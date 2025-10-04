@@ -47,16 +47,29 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        surplus: {
+          DEFAULT: "hsl(var(--surplus))",
+          light: "hsl(var(--surplus-light))",
         },
+        consumption: {
+          DEFAULT: "hsl(var(--consumption))",
+          light: "hsl(var(--consumption-light))",
+        },
+        grid: {
+          import: "hsl(var(--grid-import))",
+          export: "hsl(var(--grid-export))",
+        },
+        battery: "hsl(var(--battery))",
+      },
+      backgroundImage: {
+        'gradient-energy': 'var(--gradient-energy)',
+        'gradient-card': 'var(--gradient-card)',
+        'gradient-hero': 'var(--gradient-hero)',
+      },
+      boxShadow: {
+        'soft': 'var(--shadow-soft)',
+        'card': 'var(--shadow-card)',
+        'glow': 'var(--shadow-glow)',
       },
       borderRadius: {
         lg: "var(--radius)",
