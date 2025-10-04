@@ -2,7 +2,7 @@
  * Admin Live Simulator Dashboard - Real-time SSE streaming
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Zap, Activity, Battery, TrendingUp, TrendingDown, Play, Pause, RotateCcw, CloudRain, Flame, Car, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { NeighborhoodMap, type HomeNodeData } from "@/components/admin/NeighborhoodMap";
 
 interface SSEHome {
   id: string;
@@ -447,26 +446,78 @@ export default function AdminLive() {
           </CardContent>
         </Card>
 
-        {/* Neighborhood Map Visualization */}
-        <div>
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold">Live Home Status</h2>
-            <p className="text-muted-foreground">Real-time power flows and battery state for all 20 homes</p>
-          </div>
-          <NeighborhoodMap homes={liveData.homes.map((home, idx) => ({
-            id: home.id,
-            pv_kw: home.pv,
-            load_kw: home.load,
-            soc_pct: home.soc,
-            export_kw: home.exp,
-            import_kw: home.imp,
-            sharing_kw: home.share,
-            receiving_kw: home.recv,
-            status: 'ok',
-            x: 0, // Will be auto-laid out
-            y: 0,
-          } as HomeNodeData))} />
-        </div>
+        {/* Live Homes Grid */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Live Home Status</CardTitle>
+            <CardDescription>Real-time power flows and battery state for all 20 homes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {liveData.homes.map((home) => (
+                <Card key={home.id} className="relative overflow-hidden">
+                  <CardContent className="p-3">
+                    <div className="font-mono font-bold text-sm mb-2">{home.id}</div>
+                    
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">PV:</span>
+                        <span className="font-mono font-semibold text-yellow-600">{home.pv} kW</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Load:</span>
+                        <span className="font-mono">{home.load} kW</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">SOC:</span>
+                        <span className="font-mono">{home.soc}%</span>
+                      </div>
+                      
+                      {home.share > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Share:</span>
+                          <span className="font-mono">{home.share.toFixed(2)}</span>
+                        </div>
+                      )}
+                      
+                      {home.recv > 0 && (
+                        <div className="flex justify-between text-blue-600">
+                          <span>Recv:</span>
+                          <span className="font-mono">{home.recv.toFixed(2)}</span>
+                        </div>
+                      )}
+                      
+                      {home.exp > 0 && (
+                        <div className="flex justify-between text-purple-600">
+                          <span>Export:</span>
+                          <span className="font-mono">{home.exp.toFixed(1)}</span>
+                        </div>
+                      )}
+                      
+                      {home.imp > 0 && (
+                        <div className="flex justify-between text-red-600">
+                          <span>Import:</span>
+                          <span className="font-mono">{home.imp.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* SOC indicator */}
+                    <div className="mt-2 w-full h-1 bg-muted rounded">
+                      <div
+                        className={`h-full rounded transition-all ${
+                          home.soc > 60 ? "bg-green-500" :
+                          home.soc > 30 ? "bg-yellow-500" : "bg-red-500"
+                        }`}
+                        style={{ width: `${home.soc}%` }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Unserved Load Warning */}
         {liveData.community.unserved > 0 && (

@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Zap, LogOut } from 'lucide-react';
 
 interface AdminHeaderProps {
-  microgridId?: string;
+  microgridId: string;
 }
 
-export function AdminHeader({ microgridId = 'Live Simulator' }: AdminHeaderProps) {
+export function AdminHeader({ microgridId }: AdminHeaderProps) {
   const { logout } = useAuth();
 
   return (
