@@ -7,39 +7,30 @@ import { FairRateCard } from '@/components/admin/FairRateCard';
 import { PmgGridTrend } from '@/components/admin/PmgGridTrend';
 
 export default function Admin() {
-  const { adminOverview, adminHouses, adminGridExchange, adminTrends, manualTick } = useMockData();
-
-  if (!adminOverview || !adminGridExchange || !adminTrends) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading microgrid data...</p>
-      </div>
-    );
-  }
+  const { adminOverview, adminHouses, adminGridExchange, adminTrends } = useMockData();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[hsl(var(--bg))]">
       <AdminHeader
-        microgridId={adminOverview.microgrid_id}
-        lastUpdate={adminGridExchange.updated_at}
-        onTick={manualTick}
+        microgridId={adminOverview?.microgrid_id || 'MG-001'}
+        lastUpdate={adminGridExchange?.updated_at}
       />
 
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Grid Exchange (Top) */}
         <GridExchangeCard
-          toGridNowKwTotal={adminGridExchange.to_grid_now_kw_total}
-          toGridTodayKwhTotal={adminGridExchange.to_grid_today_kwh_total}
-          fromGridNowKwTotal={adminGridExchange.from_grid_now_kw_total}
-          gridDrawersNow={adminGridExchange.grid_drawers_now}
-          gridExportersNowTop={adminGridExchange.grid_exporters_now_top}
-          unservedNeedKw={adminGridExchange.unserved_need_kw}
-          isIslanded={adminGridExchange.is_islanded}
+          toGridNowKwTotal={adminGridExchange?.to_grid_now_kw_total}
+          toGridTodayKwhTotal={adminGridExchange?.to_grid_today_kwh_total}
+          fromGridNowKwTotal={adminGridExchange?.from_grid_now_kw_total}
+          gridDrawersNow={adminGridExchange?.grid_drawers_now || []}
+          gridExportersNowTop={adminGridExchange?.grid_exporters_now_top}
+          unservedNeedKw={adminGridExchange?.unserved_need_kw || 0}
+          isIslanded={adminGridExchange?.is_islanded || false}
         />
 
         {/* Community Overview (Middle) */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">Community Overview (Today)</h2>
+          <h2 className="text-2xl font-semibold text-[hsl(var(--text))] mb-4">Community Overview (Today)</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <CommunityTotals overview={adminOverview} />
             <FairRateCard overview={adminOverview} />

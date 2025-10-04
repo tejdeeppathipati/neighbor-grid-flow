@@ -8,7 +8,7 @@ import { GroupContext } from '@/components/user/GroupContext';
 import { MonthlyForecast } from '@/components/user/MonthlyForecast';
 
 export default function UserApp() {
-  const { getUserSummary, getUserPatterns, getUserSharing, getUserForecast, manualTick } = useMockData();
+  const { getUserSummary, getUserPatterns, getUserSharing, getUserForecast } = useMockData();
   
   const homeId = 'H7';
   const summary = getUserSummary(homeId);
@@ -16,20 +16,11 @@ export default function UserApp() {
   const sharing = getUserSharing(homeId);
   const forecast = getUserForecast(homeId);
 
-  if (!summary || !patterns || !sharing || !forecast) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading home data...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[hsl(var(--bg))]">
       <UserHeader
         homeId={homeId}
-        lastUpdate={summary.updated_at}
-        onTick={manualTick}
+        lastUpdate={summary?.updated_at}
       />
 
       <main className="container mx-auto px-4 py-8 space-y-8">

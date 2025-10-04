@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 import type { AdminOverview } from '@/data/MockDataProvider';
 
 interface FairRateCardProps {
-  overview: AdminOverview;
+  overview?: AdminOverview;
 }
 
 export function FairRateCard({ overview }: FairRateCardProps) {
