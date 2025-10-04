@@ -1,17 +1,17 @@
 import { Card } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import type { UserPatterns } from '@/data/MockDataProvider';
+import type { UserTodayPoint } from '@/hooks/useUserData';
 
 interface UsagePatternChartProps {
-  patterns: UserPatterns;
+  todayData: UserTodayPoint[];
 }
 
-export function UsagePatternChart({ patterns }: UsagePatternChartProps) {
-  const data = patterns.times.map((time, idx) => ({
-    time,
-    solar: Math.round(patterns.solar_kwh[idx]),
-    consumption: Math.round(patterns.consumption_kwh[idx]),
-    toGrid: Math.round((patterns as any).to_grid_kwh?.[idx] || 0),
+export function UsagePatternChart({ todayData }: UsagePatternChartProps) {
+  const data = todayData.map((point) => ({
+    time: new Date(point.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    solar: Math.round(point.pv_w / 1000),
+    consumption: Math.round(point.load_w / 1000),
+    toGrid: Math.round(point.sent_to_grid_w / 1000),
   }));
 
   return (
