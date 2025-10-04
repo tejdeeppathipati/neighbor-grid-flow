@@ -516,11 +516,29 @@ export type Database = {
           mg_used_wh: number | null
           microgrid_id: string | null
           prod_wh: number | null
-          production_w_sum_dummy: number | null
+          unserved_wh: number | null
+        }
+        Insert: {
+          day?: string | null
+          grid_export_wh?: number | null
+          grid_import_wh?: number | null
+          mg_used_wh?: number | null
+          microgrid_id?: string | null
+          prod_wh?: number | null
+          unserved_wh?: number | null
+        }
+        Update: {
+          day?: string | null
+          grid_export_wh?: number | null
+          grid_import_wh?: number | null
+          mg_used_wh?: number | null
+          microgrid_id?: string | null
+          prod_wh?: number | null
+          unserved_wh?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "tick_state_community_microgrid_id_fkey"
+            foreignKeyName: "rollup_daily_community_microgrid_id_fkey"
             columns: ["microgrid_id"]
             isOneToOne: false
             referencedRelation: "microgrids"
