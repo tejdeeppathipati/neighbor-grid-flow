@@ -163,7 +163,7 @@ export default function AdminLive() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <AdminHeader />
+        <AdminHeader microgridId="default" />
         <div className="max-w-7xl mx-auto p-6">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -199,7 +199,7 @@ export default function AdminLive() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminHeader />
+      <AdminHeader microgridId="default" />
 
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}

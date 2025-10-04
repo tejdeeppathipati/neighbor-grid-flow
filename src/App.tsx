@@ -13,6 +13,7 @@ const AdminCommunity = lazy(() => import("./pages/AdminCommunity"));
 const AdminLive = lazy(() => import("./pages/AdminLive"));
 const UserApp = lazy(() => import("./pages/UserApp"));
 const UserAppLive = lazy(() => import("./pages/UserAppLive"));
+const HomeDetails = lazy(() => import("./pages/HomeDetails"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const LoginUser = lazy(() => import("./pages/LoginUser"));
 const LoginAdmin = lazy(() => import("./pages/LoginAdmin"));
@@ -72,6 +73,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireRole="user">
                     <UserAppLive />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/home/:id" 
+                element={
+                  <ProtectedRoute requireRole="user">
+                    <HomeDetails />
                   </ProtectedRoute>
                 } 
               />

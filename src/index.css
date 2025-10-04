@@ -93,11 +93,25 @@
   }
 }
 
+:root {
+  /* Tesla-style Light Theme Variables */
+  --bg: #f7f8fb;
+  --surface: #ffffff;
+  --ink: #0b1220;
+  --muted: #6b7280;
+  --accent: #0a84ff;
+  --good: #16a34a;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+  --solar: #fbbf24;
+  --battery: #7c3aed;
+}
+
 @layer utilities {
   .energy-pulse {
     animation: energy-pulse 2s ease-in-out infinite;
   }
-  
+
   @keyframes energy-pulse {
     0%, 100% {
       opacity: 1;
@@ -124,5 +138,69 @@
 
   .tabular-nums {
     font-feature-settings: 'tnum' 1;
+  }
+
+  /* House animation delays for staggered effects */
+  .delay-75 {
+    animation-delay: 75ms;
+  }
+  
+  .delay-150 {
+    animation-delay: 150ms;
+  }
+
+  /* Glow effect for active solar panels */
+  @keyframes solar-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(234, 179, 8, 0.8);
+    }
+  }
+
+  .solar-glow {
+    animation: solar-glow 2s ease-in-out infinite;
+  }
+
+  /* Energy flow animation */
+  @keyframes flow-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.1);
+    }
+  }
+
+  .flow-pulse {
+    animation: flow-pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Window light flicker */
+  @keyframes window-flicker {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .window-flicker {
+    animation: window-flicker 3s ease-in-out infinite;
+  }
+
+  /* Solar panel flicker animation */
+  @keyframes flicker {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+
+  .flicker {
+    animation: flicker 1.5s infinite alternate;
   }
 }

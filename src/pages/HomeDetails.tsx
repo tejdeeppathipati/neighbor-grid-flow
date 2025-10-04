@@ -1,127 +1,59 @@
-/**
- * User Live Dashboard - Real-time home energy monitoring
- */
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { UserHeader } from '@/components/user/UserHeader';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Home, 
+  Sun, 
+  Battery, 
+  Zap, 
+  ArrowUpCircle, 
+  ArrowDownCircle, 
+  Activity,
+  AlertTriangle,
+  Power
+} from 'lucide-react';
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { UserHeader } from "@/components/user/UserHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Activity, Home, Sun, Battery, Zap, ArrowUpCircle, ArrowDownCircle, Power, AlertTriangle } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { HeroHouse3D } from '@/components/home/HeroHouse3D';
+import { MetricTile } from '@/components/home/MetricTile';
+import { FlowStatCard } from '@/components/home/FlowStatCard';
+import { EnergyFlowChart } from '@/components/home/EnergyFlowChart';
+import { useLiveHome } from '@/components/home/useLiveHome';
 
-// Import Tesla-style components
-import { HeroHouse3DPro } from "@/components/home/HeroHouse3DPro";
-import { MetricTile } from "@/components/home/MetricTile";
-import { FlowStatCard } from "@/components/home/FlowStatCard";
-import { EnergyFlowChart } from "@/components/home/EnergyFlowChart";
+export default function HomeDetails() {
+  const { id } = useParams<{ id: string }>();
+  const homeId = id || 'H001';
+  
+  const { home, grid, community, history, lastUpdate, connected, error } = useLiveHome(homeId);
 
-interface SSEHome {
-  id: string;
-  pv: number;
-  load: number;
-  soc: number;
-  share: number;
-  recv: number;
-  imp: number;
-  exp: number;
-  creditsDelta: number;
-}
-
-interface ChartPoint {
-  time: string;
-  solar: number;
-  consumption: number;
-  battery: number;
-  sharing: number;
-  receiving: number;
-  gridImport: number;
-  gridExport: number;
-}
-
-export default function UserAppLive() {
-  const { homeId: authHomeId } = useAuth();
-  const homeId = authHomeId || "H001"; // Default to H001 if not set
-  const [connected, setConnected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [liveHome, setLiveHome] = useState<SSEHome | null>(null);
-  const [chartData, setChartData] = useState<ChartPoint[]>([]);
-  const maxDataPoints = 60; // 30 seconds of history
-
-  useEffect(() => {
-    const es = new EventSource("http://localhost:3001/stream");
-
-    es.onopen = () => {
-      setConnected(true);
-      setError(null);
-    };
-
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        // Find this user's home
-        const myHome = data.homes.find((h: SSEHome) => h.id === homeId);
-        
-        if (myHome) {
-          setLiveHome(myHome);
-          
-          // Add to chart
-          const time = new Date(data.ts);
-          const newPoint: ChartPoint = {
-            time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            solar: myHome.pv,
-            consumption: myHome.load,
-            battery: myHome.soc,
-            sharing: myHome.share,
-            receiving: myHome.recv,
-            gridImport: myHome.imp,
-            gridExport: myHome.exp,
-          };
-          
-          setChartData(prev => {
-            const updated = [...prev, newPoint];
-            return updated.slice(-maxDataPoints);
-          });
-        }
-      } catch (err) {
-        console.error("Failed to parse SSE data:", err);
-      }
-    };
-
-    es.onerror = () => {
-      setConnected(false);
-      setError("Connection lost. Make sure simulator is running.");
-    };
-
-    return () => es.close();
-  }, [homeId]);
-
+  // Handle connection errors
   if (error) {
     return (
-      <div className="min-h-screen bg-background">
-        <UserHeader homeId={homeId || "H001"} />
+      <div className="min-h-screen bg-[var(--bg)]">
+        <UserHeader homeId={homeId} />
         <div className="max-w-6xl mx-auto p-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Connection Error</h1>
-            <p className="text-muted-foreground">{error}</p>
+            <h1 className="text-2xl font-bold text-[var(--bad)] mb-4">Connection Error</h1>
+            <p className="text-[var(--muted)]">{error}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!liveHome) {
+  // Loading state
+  if (!home) {
     return (
-      <div className="min-h-screen bg-background">
-        <UserHeader homeId={homeId || "H001"} />
+      <div className="min-h-screen bg-[var(--bg)]">
+        <UserHeader homeId={homeId} />
         <div className="max-w-6xl mx-auto p-6">
           <div className="text-center">
-            <Activity className="h-12 w-12 animate-pulse mx-auto text-primary mb-4" />
+            <Activity className="h-12 w-12 animate-pulse mx-auto text-[var(--accent)] mb-4" />
             <h1 className="text-2xl font-bold mb-2">Connecting to Home {homeId}...</h1>
-            <p className="text-muted-foreground">Loading live energy data</p>
+            <p className="text-[var(--muted)]">Loading live energy data</p>
           </div>
         </div>
       </div>
@@ -142,10 +74,10 @@ export default function UserAppLive() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <UserHeader homeId={homeId || "H001"} />
+      <UserHeader homeId={homeId} />
 
       <div className="max-w-6xl mx-auto p-6 space-y-6">
-        {/* Tesla-style Header */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2 text-[var(--ink)]">
@@ -163,6 +95,11 @@ export default function UserAppLive() {
             >
               {connected ? "🟢 LIVE" : "⚫ Offline"}
             </Badge>
+            {lastUpdate && (
+              <span className="text-sm text-[var(--muted)]">
+                Last update: {lastUpdate}
+              </span>
+            )}
             <Button 
               variant="outline" 
               size="sm"
@@ -175,69 +112,67 @@ export default function UserAppLive() {
           </div>
         </div>
 
-        {/* Production-Grade Tesla-Style Hero */}
-        <HeroHouse3DPro
-          pvKw={liveHome.pv}
-          loadKw={liveHome.load}
-          socPct={liveHome.soc}
-          reservePct={40} // Configurable backup reserve
-          impKw={liveHome.imp}
-          expKw={liveHome.exp}
-          shareKw={liveHome.share}
-          recvKw={liveHome.recv}
-          updatedAt={new Date()}
+        {/* Hero 3D House */}
+        <HeroHouse3D
+          pvKw={home.pv}
+          loadKw={home.load}
+          socPct={home.soc}
+          gridImpKw={home.imp}
+          gridExpKw={home.exp}
+          shareKw={home.share}
+          recvKw={home.recv}
         />
 
-        {/* Tesla-style Primary Metrics */}
+        {/* Primary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <MetricTile
             title="Solar Production"
-            value={`${liveHome.pv.toFixed(1)} kW`}
+            value={`${home.pv.toFixed(1)} kW`}
             caption="Current generation"
             icon={<Sun className="h-4 w-4" />}
             tone="info"
           />
           <MetricTile
             title="Consumption"
-            value={`${liveHome.load.toFixed(1)} kW`}
+            value={`${home.load.toFixed(1)} kW`}
             caption="Current usage"
             icon={<Zap className="h-4 w-4" />}
             tone="neutral"
           />
           <MetricTile
             title="Battery SOC"
-            value={`${liveHome.soc.toFixed(0)}%`}
+            value={`${home.soc.toFixed(0)}%`}
             caption="State of charge"
             icon={<Battery className="h-4 w-4" />}
-            tone={liveHome.soc < 20 ? 'bad' : liveHome.soc < 60 ? 'neutral' : 'good'}
+            tone={home.soc < 20 ? 'bad' : home.soc < 60 ? 'neutral' : 'good'}
           />
         </div>
 
-        {/* Tesla-style Community Sharing */}
+        {/* Community Sharing */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FlowStatCard
             title="Sharing with Community"
-            kw={liveHome.share}
+            kw={home.share}
             tone="green"
             description="Helping neighbors"
             icon={<ArrowUpCircle className="h-5 w-5" />}
           />
           <FlowStatCard
             title="Receiving from Community"
-            kw={liveHome.recv}
+            kw={home.recv}
             tone="blue"
             description="Getting help from neighbors"
             icon={<ArrowDownCircle className="h-5 w-5" />}
           />
         </div>
 
-        {/* Tesla-style Grid Interaction */}
+        {/* Grid Interaction */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="rounded-2xl border bg-[var(--surface)] shadow-sm">
             <CardContent className="p-6">
               <div className="text-center p-4 bg-orange-50 dark:bg-orange-950/20 rounded-xl">
                 <div className="text-2xl font-bold text-[var(--warn)]">
-                  {liveHome.imp.toFixed(1)} kW
+                  {home.imp.toFixed(1)} kW
                 </div>
                 <div className="text-sm text-[var(--muted)]">Grid Import</div>
               </div>
@@ -248,7 +183,7 @@ export default function UserAppLive() {
             <CardContent className="p-6">
               <div className="text-center p-4 bg-cyan-50 dark:bg-cyan-950/20 rounded-xl">
                 <div className="text-2xl font-bold text-cyan-600">
-                  {liveHome.exp.toFixed(1)} kW
+                  {home.exp.toFixed(1)} kW
                 </div>
                 <div className="text-sm text-[var(--muted)]">Grid Export</div>
               </div>
@@ -256,11 +191,22 @@ export default function UserAppLive() {
           </Card>
         </div>
 
-        {/* Tesla-style Energy Flow Chart */}
-        <EnergyFlowChart data={chartData} maxDataPoints={maxDataPoints} />
+        {/* Energy Flow Chart */}
+        <EnergyFlowChart data={history} maxDataPoints={60} />
 
-        {/* Tesla-style Success Message */}
-        <Card className="border-green-500/50 bg-green-50 dark:bg-green-950/20 rounded-2xl">
+        {/* Unserved Load Alert */}
+        {community.unserved > 0 && (
+          <Alert className="border-[var(--bad)] bg-red-50 dark:bg-red-950/20">
+            <AlertTriangle className="h-4 w-4 text-[var(--bad)]" />
+            <AlertDescription className="text-[var(--bad)]">
+              <strong>Unserved Load Detected:</strong> {community.unserved.toFixed(2)} kW of demand 
+              cannot be met by current generation and storage capacity.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Success Message */}
+        <Card className="border-green-500/50 bg-green-50 dark:bg-green-950/20">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
