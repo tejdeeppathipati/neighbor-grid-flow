@@ -30,17 +30,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           // Fetch user role from database
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('users')
             .select('role')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
           
+          console.log('User role fetch:', data, error);
           setRole(data?.role || null);
         } else {
           setRole(null);
@@ -51,19 +53,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        supabase
-          .from('users')
-          .select('role')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data }) => {
+        const fetchRole = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', session.user.id)
+              .maybeSingle();
+            
+            console.log('Initial role fetch:', data, error);
             setRole(data?.role || null);
+          } catch (err) {
+            console.error('Role fetch error:', err);
+          } finally {
             setLoading(false);
-          });
+          }
+        };
+        fetchRole();
       } else {
         setLoading(false);
       }
