@@ -1,29 +1,31 @@
 import { RoleSwitcher } from '@/components/RoleSwitcher';
-import { Home } from 'lucide-react';
+import { TickControls } from '@/components/TickControls';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { Home, Zap } from 'lucide-react';
 
 interface UserHeaderProps {
   homeId: string;
   lastUpdate?: string;
+  onTick: () => void;
 }
 
-export function UserHeader({ homeId, lastUpdate }: UserHeaderProps) {
+export function UserHeader({ homeId, lastUpdate, onTick }: UserHeaderProps) {
   return (
-    <header className="border-b border-[hsl(var(--border))] bg-[hsl(var(--surface))] shadow-[var(--shadow-soft)]">
+    <header className="border-b bg-card shadow-soft">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(var(--acc-green))] to-[hsl(var(--acc-cyan))]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-energy">
               <Home className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-[hsl(var(--text))]">My Home</h1>
-              <p className="text-sm text-[hsl(var(--text-dim))]">NeighborGrid • {homeId}</p>
+              <h1 className="text-2xl font-bold">My Home</h1>
+              <p className="text-sm text-muted-foreground">NeighborGrid • {homeId}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-[hsl(var(--text-dim))]">
-              Last update: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : '—'}
-            </span>
+            <ThemeToggle />
+            <TickControls onTick={onTick} lastUpdate={lastUpdate} />
             <RoleSwitcher />
           </div>
         </div>

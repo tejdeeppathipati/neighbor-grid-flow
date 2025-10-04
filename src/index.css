@@ -2,79 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Sustainable Future Light Theme - Production Ready
-All colors MUST be defined as CSS custom properties.
-Single theme optimized for clarity and sustainability aesthetics.
+/* Black Theme Design System - Tesla-inspired true black UI
+All colors MUST be HSL.
+Theme switching via data-theme attribute on html element.
 */
 
 @layer base {
-  :root {
-    /* Base colors - Sustainable eco palette */
-    --bg: 246 250 247;        /* #F6FAF7 soft eco off-white */
-    --surface: 0 0% 100%;     /* #FFFFFF cards */
-    --surface-2: 241 245 243; /* #F1F5F3 panels/chart bg */
-    --border: 227 234 230;    /* #E3EAE6 */
+  :root[data-theme="dark"], :root {
+    /* True Black Theme */
+    --background: 222 17% 4%;  /* #0A0B0D */
+    --foreground: 220 8% 91%;  /* #E6E8EB */
 
-    --text: 15 26 26;         /* #0F1A1A charcoal-green */
-    --text-dim: 81 96 93;     /* #51605D */
-    --muted: 124 139 135;     /* #7C8B87 */
+    --card: 218 15% 6%;  /* #0F1216 */
+    --card-foreground: 220 8% 91%;
 
-    /* Semantic accents - Energy flow colors */
-    --acc-cyan: 186 100% 39%;   /* #00B6C8 Sharing/surplus */
-    --acc-amber: 41 81% 52%;    /* #EAA21E Receiving/deficit */
-    --acc-blue: 218 100% 62%;   /* #3E8BFF Grid export */
-    --acc-red: 0 65% 55%;       /* #DC3E3E Grid import */
-    --acc-green: 158 73% 40%;   /* #18B47B Battery/sustainability */
-    --tick: 141 48% 85%;        /* #CFE7DC Battery reserve */
+    --popover: 218 15% 6%;
+    --popover-foreground: 220 8% 91%;
 
-    /* Legacy mappings for compatibility */
-    --background: var(--bg);
-    --foreground: var(--text);
-    
-    --card: var(--surface);
-    --card-foreground: var(--text);
-    
-    --popover: var(--surface);
-    --popover-foreground: var(--text);
-    
-    --primary: var(--acc-green);
+    --primary: 191 91% 53%;  /* #21D4EF cyan */
     --primary-foreground: 0 0% 100%;
-    
-    --secondary: var(--surface-2);
-    --secondary-foreground: var(--text);
-    
-    --muted-foreground: var(--text-dim);
-    
-    --accent: var(--acc-cyan);
+
+    --secondary: 216 20% 8%;  /* #12161C */
+    --secondary-foreground: 220 8% 91%;
+
+    --muted: 216 20% 8%;
+    --muted-foreground: 217 11% 69%;  /* #A9B1BB */
+
+    --accent: 191 91% 53%;
     --accent-foreground: 0 0% 100%;
-    
-    --destructive: var(--acc-red);
+
+    --destructive: 0 77% 63%;  /* #F05252 red */
     --destructive-foreground: 0 0% 100%;
-    
-    --input: var(--border);
-    --ring: var(--acc-green);
+
+    --border: 221 24% 15%;  /* #1D232F */
+    --input: 221 24% 15%;
+    --ring: 191 91% 53%;
 
     --radius: 1rem;
 
-    /* Energy-specific semantic colors */
-    --surplus: var(--acc-cyan);
-    --surplus-light: 186 100% 95%;
-    --consumption: var(--acc-amber);
-    --consumption-light: 41 81% 95%;
-    --grid-import: var(--acc-red);
-    --grid-export: var(--acc-blue);
-    --battery: var(--acc-green);
-    --battery-reserve: var(--tick);
+    /* Energy-specific colors - Black Theme */
+    --surplus: 191 91% 53%;  /* #21D4EF cyan - sharing/to microgrid */
+    --surplus-light: 191 90% 20%;
+    --consumption: 38 91% 56%;  /* #F6A723 amber - deficit/from microgrid */
+    --consumption-light: 38 90% 20%;
+    --grid-import: 0 77% 63%;  /* #F05252 red - import from grid */
+    --grid-export: 218 100% 69%;  /* #6BA8FF blue - export to grid */
+    --battery: 156 87% 41%;  /* #1BD18A green */
+    --battery-reserve: 222 15% 17%;  /* #2B2F37 */
     
-    /* Gradients - Sustainable theme */
-    --gradient-energy: linear-gradient(135deg, hsl(var(--acc-cyan)) 0%, hsl(var(--acc-green)) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-2)) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(var(--acc-green) / 0.1) 0%, hsl(var(--acc-cyan) / 0.1) 100%);
+    /* Gradients */
+    --gradient-energy: linear-gradient(135deg, hsl(191 91% 53%) 0%, hsl(191 80% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(218 15% 6%) 0%, hsl(218 13% 8%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(191 91% 53% / 0.15) 0%, hsl(218 100% 69% / 0.15) 100%);
     
-    /* Shadows - Clean, subtle */
-    --shadow-soft: 0 2px 8px rgba(20, 39, 33, 0.04);
-    --shadow-card: 0 10px 30px rgba(20, 39, 33, 0.08);
-    --shadow-glow: 0 0 20px hsl(var(--acc-green) / 0.15);
+    /* Shadows - True black premium */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 20px hsl(191 91% 53% / 0.4);
+  }
+
+  :root[data-theme="light"] {
+    /* Light Theme */
+    --background: 210 40% 98%;  /* #F7F9FC */
+    --foreground: 222 47% 11%;  /* #0F172A */
+
+    --card: 0 0% 100%;  /* #FFFFFF */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 191 91% 53%;  /* #21D4EF cyan */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 96%;  /* #F3F5F8 */
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;  /* #475569 */
+
+    --accent: 191 91% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 77% 63%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;  /* #E2E8F0 */
+    --input: 214 32% 91%;
+    --ring: 191 91% 53%;
+
+    --radius: 1rem;
+
+    /* Energy colors - Light Theme (same hues, adjusted) */
+    --surplus: 191 80% 45%;
+    --surplus-light: 191 70% 90%;
+    --consumption: 38 80% 50%;
+    --consumption-light: 38 70% 90%;
+    --grid-import: 0 70% 55%;
+    --grid-export: 218 90% 60%;
+    --battery: 156 75% 38%;
+    --battery-reserve: 220 15% 85%;
+    
+    /* Gradients - Light */
+    --gradient-energy: linear-gradient(135deg, hsl(191 80% 45%) 0%, hsl(191 70% 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(191 80% 45% / 0.1) 0%, hsl(218 90% 60% / 0.1) 100%);
+    
+    /* Shadows - Light */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px hsl(191 80% 45% / 0.3);
   }
 }
 
