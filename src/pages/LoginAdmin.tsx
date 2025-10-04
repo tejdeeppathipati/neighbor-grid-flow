@@ -7,9 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginAdmin() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +47,8 @@ export default function LoginAdmin() {
 
         if (error) throw error;
 
+        // Set admin role in AuthContext after successful Supabase login
+        login('admin');
         navigate('/admin');
       }
     } catch (error: any) {
