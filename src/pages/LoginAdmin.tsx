@@ -14,23 +14,41 @@ export default function LoginAdmin() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`
+          }
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      navigate('/admin');
+        toast({
+          title: 'Account created',
+          description: 'Please check your email to verify your account.',
+        });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        navigate('/admin');
+      }
     } catch (error: any) {
       toast({
-        title: 'Sign-in failed',
+        title: isSignUp ? 'Sign-up failed' : 'Sign-in failed',
         description: error.message,
         variant: 'destructive',
       });
@@ -66,7 +84,7 @@ export default function LoginAdmin() {
                 NeighborGrid
               </div>
               <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
-                Admin Console Sign in
+                {isSignUp ? 'Admin Console Sign up' : 'Admin Console Sign in'}
               </h1>
               <div className="flex items-center gap-2">
                 <p className="text-sm" style={{ color: 'var(--text-dim)' }}>For microgrid operators</p>
@@ -139,19 +157,22 @@ export default function LoginAdmin() {
               <Button
                 type="submit"
                 disabled={isDisabled}
-                className="w-full h-12 text-white font-medium transition-all active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style={{
-                  backgroundColor: isDisabled ? 'var(--surface-2)' : 'var(--acc-green)',
-                  color: isDisabled ? 'var(--muted)' : 'white',
-                  borderRadius: 'var(--radius-xl)',
-                  boxShadow: isDisabled ? 'none' : 'var(--shadow-soft)'
-                }}
+                className="w-full h-12 font-medium transition-all active:translate-y-px"
+                variant="default"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create account' : 'Sign in')}
               </Button>
             </div>
 
             <div className="flex justify-between items-center text-sm pt-1">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
+                style={{ color: 'var(--acc-cyan)' }}
+              >
+                {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
+              </button>
               <Link
                 to="/login/user"
                 className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"

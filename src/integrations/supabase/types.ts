@@ -637,6 +637,16 @@ export type Database = {
       }
     }
     Functions: {
+      create_test_user: {
+        Args: {
+          test_email: string
+          test_home_id?: string
+          test_microgrid_id?: string
+          test_password: string
+          test_role: Database["public"]["Enums"]["role_t"]
+        }
+        Returns: string
+      }
       get_user_home: {
         Args: { _user_id: string }
         Returns: {
