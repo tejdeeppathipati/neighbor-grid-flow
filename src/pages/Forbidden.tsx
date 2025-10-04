@@ -16,7 +16,7 @@ export default function Forbidden() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="text-center max-w-md">
         <div 
           className="flex h-20 w-20 items-center justify-center rounded-full mx-auto mb-6"

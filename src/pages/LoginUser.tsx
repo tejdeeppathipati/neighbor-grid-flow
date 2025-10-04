@@ -34,39 +34,39 @@ export default function LoginUser() {
   const isDisabled = !email || !password;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Centered form */}
-      <div className="w-full flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="w-full max-w-[440px]">
         <div 
-          className="w-full max-w-md p-8 rounded-2xl"
+          className="p-10 rounded-2xl"
           style={{ 
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
-            boxShadow: 'var(--shadow-lg)',
+            boxShadow: 'var(--shadow-card)',
             borderRadius: 'var(--radius-xl)'
           }}
         >
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div 
-                className="flex h-12 w-12 items-center justify-center rounded-xl"
-                style={{ background: 'var(--gradient-energy)' }}
-              >
-                <Home className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold" style={{ color: 'var(--text)' }}>
-                NeighborGrid
-              </h1>
+          {/* Brand lockup */}
+          <div className="flex items-start gap-3 mb-5">
+            <div 
+              className="flex h-6 w-6 items-center justify-center rounded"
+              style={{ backgroundColor: 'var(--surface-2)' }}
+            >
+              <Home className="h-4 w-4" style={{ color: 'var(--acc-green)' }} />
             </div>
-            <h2 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text)' }}>
-              Sign in to NeighborGrid
-            </h2>
-            <p style={{ color: 'var(--text-dim)' }}>For homeowners</p>
+            <div className="flex-1">
+              <div className="font-semibold mb-1" style={{ color: 'var(--text)' }}>
+                NeighborGrid
+              </div>
+              <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
+                Sign in to NeighborGrid
+              </h1>
+              <p className="text-sm" style={{ color: 'var(--text-dim)' }}>For homeowners</p>
+            </div>
           </div>
 
-          {/* Demo credentials notice */}
+          {/* Demo credentials helper */}
           <div 
-            className="p-3 rounded-lg mb-6"
+            className="p-3 rounded-lg mb-5"
             style={{ 
               backgroundColor: 'var(--surface-2)',
               border: '1px solid var(--border)'
@@ -75,51 +75,57 @@ export default function LoginUser() {
             <p className="text-xs font-medium mb-1" style={{ color: 'var(--text)' }}>
               Demo Credentials
             </p>
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
               Email: user@demo.com<br />
               Password: demo123<br />
               Home ID: H7
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <Label htmlFor="email" style={{ color: 'var(--text)' }}>Email</Label>
+              <Label htmlFor="email" className="text-sm" style={{ color: 'var(--text-dim)' }}>Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
                 required
-                className="mt-1"
+                className="mt-1 h-12"
                 style={{
-                  backgroundColor: 'var(--surface-2)',
+                  backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
-                  color: 'var(--text)'
+                  color: 'var(--text)',
+                  borderRadius: 'var(--radius-xl)'
                 }}
               />
             </div>
 
             <div>
-              <Label htmlFor="password" style={{ color: 'var(--text)' }}>Password</Label>
+              <Label htmlFor="password" className="text-sm" style={{ color: 'var(--text-dim)' }}>Password</Label>
               <div className="relative mt-1">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
                   required
+                  className="h-12 pr-10"
                   style={{
-                    backgroundColor: 'var(--surface-2)',
+                    backgroundColor: 'var(--surface)',
                     border: '1px solid var(--border)',
-                    color: 'var(--text)'
+                    color: 'var(--text)',
+                    borderRadius: 'var(--radius-xl)'
                   }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
                   style={{ color: 'var(--muted)' }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -127,7 +133,7 @@ export default function LoginUser() {
             </div>
 
             <div>
-              <Label htmlFor="homeId" style={{ color: 'var(--text)' }}>
+              <Label htmlFor="homeId" className="text-sm" style={{ color: 'var(--text-dim)' }}>
                 Home ID <span style={{ color: 'var(--muted)' }}>(optional)</span>
               </Label>
               <Input
@@ -136,39 +142,44 @@ export default function LoginUser() {
                 value={homeId}
                 onChange={(e) => setHomeId(e.target.value)}
                 placeholder="e.g., H7"
-                className="mt-1"
+                className="mt-1 h-12"
                 style={{
-                  backgroundColor: 'var(--surface-2)',
+                  backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
-                  color: 'var(--text)'
+                  color: 'var(--text)',
+                  borderRadius: 'var(--radius-xl)'
                 }}
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={isDisabled}
-              className="w-full text-white font-medium"
-              style={{
-                backgroundColor: 'var(--acc-green)',
-                opacity: isDisabled ? 0.5 : 1,
-              }}
-            >
-              Sign in
-            </Button>
+            <div className="pt-1">
+              <Button
+                type="submit"
+                disabled={isDisabled}
+                className="w-full h-12 text-white font-medium transition-all active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{
+                  backgroundColor: isDisabled ? 'var(--surface-2)' : 'var(--acc-green)',
+                  color: isDisabled ? 'var(--muted)' : 'white',
+                  borderRadius: 'var(--radius-xl)',
+                  boxShadow: isDisabled ? 'none' : 'var(--shadow-soft)'
+                }}
+              >
+                Sign in
+              </Button>
+            </div>
 
-            <div className="space-y-3 text-center text-sm">
+            <div className="flex justify-between items-center text-sm pt-1">
               <Link
                 to="/login/admin"
-                className="block hover:underline"
+                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
                 style={{ color: 'var(--acc-cyan)' }}
               >
                 Sign in as Admin
               </Link>
               <button
                 type="button"
-                className="hover:underline"
-                style={{ color: 'var(--muted)' }}
+                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
+                style={{ color: 'var(--text-dim)' }}
               >
                 Forgot password?
               </button>

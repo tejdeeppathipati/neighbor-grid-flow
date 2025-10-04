@@ -25,7 +25,7 @@ export default function UserApp() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen">
       <UserHeader homeId={homeId} />
 
       <main className="container mx-auto px-4 py-8 space-y-8">

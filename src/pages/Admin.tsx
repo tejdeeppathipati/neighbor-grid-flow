@@ -18,7 +18,7 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="min-h-screen">
       <AdminHeader
         microgridId={adminOverview.microgrid_id}
       />
