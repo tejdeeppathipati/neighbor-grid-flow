@@ -29,53 +29,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
+        // CRITICAL: Defer Supabase calls to prevent deadlock
         if (session?.user) {
-          // Fetch user role from database
-          const { data, error } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', session.user.id)
-            .maybeSingle();
-          
-          console.log('User role fetch:', data, error);
-          setRole(data?.role || null);
+          setTimeout(async () => {
+            try {
+              const { data, error } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              console.log('User role fetch:', data, error);
+              setRole(data?.role || null);
+              setLoading(false);
+            } catch (err) {
+              console.error('Role fetch error:', err);
+              setRole(null);
+              setLoading(false);
+            }
+          }, 0);
         } else {
           setRole(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const fetchRole = async () => {
-          try {
-            const { data, error } = await supabase
-              .from('users')
-              .select('role')
-              .eq('id', session.user.id)
-              .maybeSingle();
-            
-            console.log('Initial role fetch:', data, error);
-            setRole(data?.role || null);
-          } catch (err) {
-            console.error('Role fetch error:', err);
-          } finally {
-            setLoading(false);
-          }
-        };
-        fetchRole();
-      } else {
+      if (!session) {
         setLoading(false);
       }
     });
