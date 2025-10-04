@@ -15,6 +15,7 @@ export default function LoginAdmin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ export default function LoginAdmin() {
 
         toast({
           title: 'Account created',
-          description: 'Please check your email to verify your account.',
+          description: 'You can now sign in immediately.',
         });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -54,6 +55,28 @@ export default function LoginAdmin() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setupDemoUsers = async () => {
+    setSetupLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-demo-users');
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Demo users created!',
+        description: 'You can now sign in with admin@demo.com or user@demo.com (password: demo123)',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Setup failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setSetupLoading(false);
     }
   };
 
@@ -180,6 +203,23 @@ export default function LoginAdmin() {
               >
                 Sign in as User
               </Link>
+            </div>
+
+            {/* Demo Setup Button */}
+            <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+              <button
+                type="button"
+                onClick={setupDemoUsers}
+                disabled={setupLoading}
+                className="w-full text-xs py-2 px-3 rounded-lg transition-colors hover:opacity-80"
+                style={{
+                  backgroundColor: 'var(--surface-2)',
+                  color: 'var(--text-dim)',
+                  border: '1px dashed var(--border)'
+                }}
+              >
+                {setupLoading ? 'Setting up...' : '🔧 First time? Click to create demo users'}
+              </button>
             </div>
           </form>
         </div>
