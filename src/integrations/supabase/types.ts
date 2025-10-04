@@ -619,7 +619,21 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_user_home: {
+        Args: { _user_id: string }
+        Returns: {
+          home_id: string
+          microgrid_id: string
+        }[]
+      }
+      get_user_microgrid: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      is_admin: {
+        Args: { _microgrid_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       allocation_t: "equal_share" | "need_based" | "cap_per_home"
