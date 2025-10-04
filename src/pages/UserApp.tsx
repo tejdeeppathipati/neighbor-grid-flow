@@ -25,12 +25,8 @@ export default function UserApp() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <UserHeader
-        homeId={homeId}
-        lastUpdate={summary.updated_at}
-        onTick={manualTick}
-      />
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+      <UserHeader homeId={homeId} />
 
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Summary Row */}

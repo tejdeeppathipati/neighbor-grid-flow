@@ -18,11 +18,9 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
       <AdminHeader
         microgridId={adminOverview.microgrid_id}
-        lastUpdate={adminGridExchange.updated_at}
-        onTick={manualTick}
       />
 
       <main className="container mx-auto px-4 py-8 space-y-8">

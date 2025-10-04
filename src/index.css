@@ -2,116 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Black Theme Design System - Tesla-inspired true black UI
-All colors MUST be HSL.
-Theme switching via data-theme attribute on html element.
-*/
+/* Sustainable Future Light Theme - All colors MUST be HSL */
 
 @layer base {
-  :root[data-theme="dark"], :root {
-    /* True Black Theme */
-    --background: 222 17% 4%;  /* #0A0B0D */
-    --foreground: 220 8% 91%;  /* #E6E8EB */
+  :root {
+    /* Light sustainable theme */
+    --bg: 150 20% 97%;  /* #F6FAF7 soft eco off-white */
+    --surface: 0 0% 100%;  /* #FFFFFF */
+    --surface-2: 144 17% 95%;  /* #F1F5F3 */
+    --border: 150 15% 89%;  /* #E3EAE6 */
 
-    --card: 218 15% 6%;  /* #0F1216 */
-    --card-foreground: 220 8% 91%;
+    --text: 180 29% 8%;  /* #0F1A1A charcoal-green */
+    --text-dim: 165 10% 37%;  /* #51605D */
+    --muted: 165 7% 53%;  /* #7C8B87 */
 
-    --popover: 218 15% 6%;
-    --popover-foreground: 220 8% 91%;
+    /* Semantic accents */
+    --acc-cyan: 187 100% 39%;  /* #00B6C8 sharing/surplus */
+    --acc-amber: 39 81% 52%;  /* #EAA21E receiving/deficit */
+    --acc-blue: 218 100% 62%;  /* #3E8BFF grid export */
+    --acc-red: 0 66% 54%;  /* #DC3E3E grid import */
+    --acc-green: 158 74% 40%;  /* #18B47B battery/sustainability */
+    --tick: 156 37% 85%;  /* #CFE7DC battery reserve tick */
 
-    --primary: 191 91% 53%;  /* #21D4EF cyan */
-    --primary-foreground: 0 0% 100%;
+    --radius-xl: 16px;
+    --shadow-lg: 0 10px 30px rgba(20, 39, 33, 0.08);
 
-    --secondary: 216 20% 8%;  /* #12161C */
-    --secondary-foreground: 220 8% 91%;
-
-    --muted: 216 20% 8%;
-    --muted-foreground: 217 11% 69%;  /* #A9B1BB */
-
-    --accent: 191 91% 53%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 77% 63%;  /* #F05252 red */
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 221 24% 15%;  /* #1D232F */
-    --input: 221 24% 15%;
-    --ring: 191 91% 53%;
-
-    --radius: 1rem;
-
-    /* Energy-specific colors - Black Theme */
-    --surplus: 191 91% 53%;  /* #21D4EF cyan - sharing/to microgrid */
-    --surplus-light: 191 90% 20%;
-    --consumption: 38 91% 56%;  /* #F6A723 amber - deficit/from microgrid */
-    --consumption-light: 38 90% 20%;
-    --grid-import: 0 77% 63%;  /* #F05252 red - import from grid */
-    --grid-export: 218 100% 69%;  /* #6BA8FF blue - export to grid */
-    --battery: 156 87% 41%;  /* #1BD18A green */
-    --battery-reserve: 222 15% 17%;  /* #2B2F37 */
-    
     /* Gradients */
-    --gradient-energy: linear-gradient(135deg, hsl(191 91% 53%) 0%, hsl(191 80% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(218 15% 6%) 0%, hsl(218 13% 8%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(191 91% 53% / 0.15) 0%, hsl(218 100% 69% / 0.15) 100%);
-    
-    /* Shadows - True black premium */
-    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.5);
-    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.6);
-    --shadow-glow: 0 0 20px hsl(191 91% 53% / 0.4);
-  }
+    --gradient-energy: linear-gradient(135deg, hsl(158 74% 40%) 0%, hsl(187 100% 39%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(144 17% 95%) 100%);
 
-  :root[data-theme="light"] {
-    /* Light Theme */
-    --background: 210 40% 98%;  /* #F7F9FC */
-    --foreground: 222 47% 11%;  /* #0F172A */
-
-    --card: 0 0% 100%;  /* #FFFFFF */
-    --card-foreground: 222 47% 11%;
-
+    /* Radix-compatible mappings for UI components */
+    --background: 150 20% 97%;
+    --foreground: 180 29% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 180 29% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 191 91% 53%;  /* #21D4EF cyan */
+    --popover-foreground: 180 29% 8%;
+    --primary: 158 74% 40%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 20% 96%;  /* #F3F5F8 */
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 16% 47%;  /* #475569 */
-
-    --accent: 191 91% 53%;
+    --secondary: 144 17% 95%;
+    --secondary-foreground: 180 29% 8%;
+    --muted: 144 17% 95%;
+    --muted-foreground: 165 7% 53%;
+    --accent: 187 100% 39%;
     --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 77% 63%;
+    --destructive: 0 66% 54%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 214 32% 91%;  /* #E2E8F0 */
-    --input: 214 32% 91%;
-    --ring: 191 91% 53%;
-
+    --input: 150 15% 89%;
+    --ring: 187 100% 39%;
     --radius: 1rem;
 
-    /* Energy colors - Light Theme (same hues, adjusted) */
-    --surplus: 191 80% 45%;
-    --surplus-light: 191 70% 90%;
-    --consumption: 38 80% 50%;
-    --consumption-light: 38 70% 90%;
-    --grid-import: 0 70% 55%;
-    --grid-export: 218 90% 60%;
-    --battery: 156 75% 38%;
-    --battery-reserve: 220 15% 85%;
-    
-    /* Gradients - Light */
-    --gradient-energy: linear-gradient(135deg, hsl(191 80% 45%) 0%, hsl(191 70% 55%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(191 80% 45% / 0.1) 0%, hsl(218 90% 60% / 0.1) 100%);
-    
-    /* Shadows - Light */
-    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 20px hsl(191 80% 45% / 0.3);
+    /* Energy-specific (legacy compatibility) */
+    --surplus: 187 100% 39%;
+    --surplus-light: 187 90% 90%;
+    --consumption: 39 81% 52%;
+    --consumption-light: 39 80% 90%;
+    --grid-import: 0 66% 54%;
+    --grid-export: 218 100% 62%;
+    --battery: 158 74% 40%;
+    --battery-reserve: 156 37% 85%;
+
+    --shadow-soft: 0 2px 8px rgba(20, 39, 33, 0.05);
+    --shadow-card: 0 10px 30px rgba(20, 39, 33, 0.08);
+    --shadow-glow: 0 0 20px hsl(187 100% 39% / 0.2);
   }
 }
 
