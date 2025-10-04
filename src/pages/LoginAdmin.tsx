@@ -205,21 +205,26 @@ export default function LoginAdmin() {
               </Link>
             </div>
 
-            {/* Demo Setup Button */}
-            <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-              <button
+            {/* Demo Setup Button - Prominent */}
+            <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+              <p className="text-xs text-center mb-2" style={{ color: 'var(--text-dim)' }}>
+                First time here? Create demo accounts to get started
+              </p>
+              <Button
                 type="button"
                 onClick={setupDemoUsers}
                 disabled={setupLoading}
-                className="w-full text-xs py-2 px-3 rounded-lg transition-colors hover:opacity-80"
+                className="w-full h-12 font-semibold"
                 style={{
-                  backgroundColor: 'var(--surface-2)',
-                  color: 'var(--text-dim)',
-                  border: '1px dashed var(--border)'
+                  backgroundColor: 'var(--acc-green)',
+                  color: 'white'
                 }}
               >
-                {setupLoading ? 'Setting up...' : '🔧 First time? Click to create demo users'}
-              </button>
+                {setupLoading ? 'Setting up demo users...' : '⚡ Setup Demo Users'}
+              </Button>
+              <p className="text-xs text-center mt-2" style={{ color: 'var(--muted)' }}>
+                Creates: admin@demo.com & user@demo.com (password: demo123)
+              </p>
             </div>
           </form>
         </div>
