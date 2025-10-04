@@ -7,10 +7,11 @@ export interface AuthState {
   isAuthenticated: boolean;
   role: Role | null;
   userId?: string | null;
+  homeId?: string | null;
 }
 
 interface AuthContextType extends AuthState {
-  login: (role: Role, userId?: string) => void;
+  login: (role: Role, userIdOrHomeId?: string) => void;
   logout: () => void;
 }
 
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
     role: null,
     userId: null,
+    homeId: null,
   });
 
   // Hydrate from sessionStorage on mount
@@ -43,11 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = (role: Role, userId?: string) => {
+  const login = (role: Role, userIdOrHomeId?: string) => {
     const newState: AuthState = {
       isAuthenticated: true,
       role,
-      userId: userId || null,
+      userId: role === 'admin' ? userIdOrHomeId || null : null,
+      homeId: role === 'user' ? userIdOrHomeId || 'H001' : null,
     };
     setAuthState(newState);
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
@@ -58,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: false,
       role: null,
       userId: null,
+      homeId: null,
     };
     setAuthState(newState);
     sessionStorage.removeItem(STORAGE_KEY);
@@ -78,3 +82,6 @@ export function useAuth() {
   }
   return context;
 }
+
+// Export default for Fast Refresh compatibility
+export default AuthProvider;

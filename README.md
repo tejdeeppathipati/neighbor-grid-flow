@@ -1,8 +1,90 @@
-# Welcome to your Lovable project
+# NeighborGrid Flow
 
-## Project info
+Community energy sharing platform with advanced dispatch algorithms.
 
-**URL**: https://lovable.dev/projects/8237b455-aced-4339-b8f9-7d8245429c0b
+## Project Components
+
+This project consists of two main components:
+
+1. **Frontend Application** - React/TypeScript UI for admin and user dashboards
+2. **Dispatch Algorithm** - Python-based energy management system
+
+**Project URL**: https://lovable.dev/projects/8237b455-aced-4339-b8f9-7d8245429c0b
+
+---
+
+## 🔋 Python Dispatch Algorithm
+
+### Single-Home Simulation
+
+For setup and usage of the single-home energy dispatch algorithm, see:
+
+**[📖 NeighborGrid Setup Guide](./NEIGHBORGRID_SETUP.md)**
+
+Quick start:
+```bash
+# Install Python dependencies
+pip3 install pandas numpy pytest
+
+# Run tests
+./run_tests.sh
+
+# Run single-home simulation
+./run_simulation.sh --hours 24 --solar-kw 6 --battery-kwh 10 --out out_single.csv
+```
+
+### Multi-Home Community Simulation
+
+For the complete admin dashboard with 10-home community simulation, see:
+
+**[📊 Admin Dashboard Guide](./ADMIN_DASHBOARD_GUIDE.md)**
+
+Quick start:
+```bash
+# Generate community data (10 homes × 5 days)
+./run_generate_community_data.sh --days 5
+
+# Start frontend
+npm run dev
+
+# Login as admin and view Community Dashboard
+# http://localhost:8080/login/admin → Admin → Community Dashboard
+```
+
+### 🎮 Live Real-Time Simulator (NEW!)
+
+For the **tick-based live simulator** with real-time SSE streaming:
+
+**[🎮 Live Simulator Guide](./LIVE_SIMULATOR_GUIDE.md)**
+
+Quick start:
+```bash
+# Start live simulator backend (20 homes, accelerated time)
+cd simulator-backend
+npm install
+npm run dev
+
+# Server runs at http://localhost:3001
+# SSE stream: http://localhost:3001/stream
+# Admin API: http://localhost:3001/state/admin
+
+# Test it
+curl http://localhost:3001/state/admin | jq
+curl -N http://localhost:3001/stream
+```
+
+**Features:**
+- ⚡ Real-time simulation (1 min = 0.5s)
+- 🏠 20 homes with physics-based dispatch
+- 📡 SSE streaming for live updates
+- 🌩️ Events: OUTAGE, CLOUDBURST, HEATWAVE, EV_SURGE
+- 🔋 Battery management with SOC tracking
+- 💰 Fair-rate credits system
+- 🌐 Grid import/export/islanding
+
+---
+
+## 🎨 Frontend Application
 
 ## How can I edit this code?
 

@@ -65,6 +65,13 @@
     --battery: 158 74% 40%;
     --battery-reserve: 156 37% 85%;
 
+    /* Chart colors for community dashboard */
+    --chart-1: 45 93% 58%;     /* #F9C74F - Warm yellow for Production */
+    --chart-2: 158 74% 40%;    /* #18B47B - Green for Microgrid */
+    --chart-3: 218 100% 62%;   /* #3E8BFF - Blue for Grid Import */
+    --chart-4: 39 81% 52%;     /* #EAA21E - Amber */
+    --chart-5: 187 100% 39%;   /* #00B6C8 - Cyan */
+
     --shadow-soft: 0 2px 8px rgba(20, 39, 33, 0.05);
     --shadow-card: 0 10px 30px rgba(20, 39, 33, 0.08);
     --shadow-glow: 0 0 20px hsl(187 100% 39% / 0.2);

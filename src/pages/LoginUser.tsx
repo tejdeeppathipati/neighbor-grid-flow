@@ -12,7 +12,7 @@ export default function LoginUser() {
   const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('user@demo.com');
   const [password, setPassword] = useState('demo123');
-  const [homeId, setHomeId] = useState('H7');
+  const [homeId, setHomeId] = useState('H001');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -27,8 +27,8 @@ export default function LoginUser() {
       title: 'Sign-in wiring coming next',
       description: 'This is a UI placeholder.',
     });
-    login('user', homeId || 'H1');
-    navigate('/app');
+    login('user', homeId || 'H001');
+    navigate('/app/live');
   };
 
   const isDisabled = !email || !password;

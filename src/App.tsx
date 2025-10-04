@@ -9,7 +9,10 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Lazy load pages for better performance
 const Admin = lazy(() => import("./pages/Admin"));
+const AdminCommunity = lazy(() => import("./pages/AdminCommunity"));
+const AdminLive = lazy(() => import("./pages/AdminLive"));
 const UserApp = lazy(() => import("./pages/UserApp"));
+const UserAppLive = lazy(() => import("./pages/UserAppLive"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const LoginUser = lazy(() => import("./pages/LoginUser"));
 const LoginAdmin = lazy(() => import("./pages/LoginAdmin"));
@@ -41,10 +44,34 @@ const App = () => (
                 } 
               />
               <Route 
+                path="/admin/community" 
+                element={
+                  <ProtectedRoute requireRole="admin">
+                    <AdminCommunity />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/live" 
+                element={
+                  <ProtectedRoute requireRole="admin">
+                    <AdminLive />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="/app" 
                 element={
                   <ProtectedRoute requireRole="user">
                     <UserApp />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/app/live" 
+                element={
+                  <ProtectedRoute requireRole="user">
+                    <UserAppLive />
                   </ProtectedRoute>
                 } 
               />
