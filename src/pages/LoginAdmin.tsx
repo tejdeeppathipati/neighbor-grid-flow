@@ -1,37 +1,86 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, Zap } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export default function LoginAdmin() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
-  const [email, setEmail] = useState('admin@demo.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/admin', { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
-
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    toast({
-      title: 'Sign-in wiring coming next',
-      description: 'This is a UI placeholder.',
-    });
-    login('admin');
-    navigate('/admin');
+    setLoading(true);
+
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`
+          }
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: 'Account created',
+          description: 'You can now sign in immediately.',
+        });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        navigate('/admin');
+      }
+    } catch (error: any) {
+      toast({
+        title: isSignUp ? 'Sign-up failed' : 'Sign-in failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const isDisabled = !email || !password;
+  const setupDemoUsers = async () => {
+    setSetupLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-demo-users');
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Demo users created!',
+        description: 'You can now sign in with admin@demo.com or user@demo.com (password: demo123)',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Setup failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setSetupLoading(false);
+    }
+  };
+
+  const isDisabled = !email || !password || loading;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
@@ -58,7 +107,7 @@ export default function LoginAdmin() {
                 NeighborGrid
               </div>
               <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
-                Admin Console Sign in
+                {isSignUp ? 'Admin Console Sign up' : 'Admin Console Sign in'}
               </h1>
               <div className="flex items-center gap-2">
                 <p className="text-sm" style={{ color: 'var(--text-dim)' }}>For microgrid operators</p>
@@ -131,19 +180,22 @@ export default function LoginAdmin() {
               <Button
                 type="submit"
                 disabled={isDisabled}
-                className="w-full h-12 text-white font-medium transition-all active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style={{
-                  backgroundColor: isDisabled ? 'var(--surface-2)' : 'var(--acc-green)',
-                  color: isDisabled ? 'var(--muted)' : 'white',
-                  borderRadius: 'var(--radius-xl)',
-                  boxShadow: isDisabled ? 'none' : 'var(--shadow-soft)'
-                }}
+                className="w-full h-12 font-medium transition-all active:translate-y-px"
+                variant="default"
               >
-                Sign in
+                {loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create account' : 'Sign in')}
               </Button>
             </div>
 
             <div className="flex justify-between items-center text-sm pt-1">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
+                style={{ color: 'var(--acc-cyan)' }}
+              >
+                {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
+              </button>
               <Link
                 to="/login/user"
                 className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
@@ -151,13 +203,28 @@ export default function LoginAdmin() {
               >
                 Sign in as User
               </Link>
-              <button
+            </div>
+
+            {/* Demo Setup Button - Prominent */}
+            <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+              <p className="text-xs text-center mb-2" style={{ color: 'var(--text-dim)' }}>
+                First time here? Create demo accounts to get started
+              </p>
+              <Button
                 type="button"
-                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
-                style={{ color: 'var(--text-dim)' }}
+                onClick={setupDemoUsers}
+                disabled={setupLoading}
+                className="w-full h-12 font-semibold"
+                style={{
+                  backgroundColor: 'var(--acc-green)',
+                  color: 'white'
+                }}
               >
-                Forgot password?
-              </button>
+                {setupLoading ? 'Setting up demo users...' : '⚡ Setup Demo Users'}
+              </Button>
+              <p className="text-xs text-center mt-2" style={{ color: 'var(--muted)' }}>
+                Creates: admin@demo.com & user@demo.com (password: demo123)
+              </p>
             </div>
           </form>
         </div>

@@ -1,26 +1,32 @@
 import { Card } from '@/components/ui/card';
 import { Sun, Zap, TrendingUp, TrendingDown } from 'lucide-react';
-import type { UserSummary } from '@/data/MockDataProvider';
+import type { UserHomeLatest, UserDailyStats } from '@/hooks/useUserData';
 import { formatKw, formatKwh } from '@/lib/formatters';
 
 interface HomeSummaryCardProps {
-  summary: UserSummary;
+  homeLatest: UserHomeLatest | null;
+  dailyStats: UserDailyStats | null;
 }
 
-export function HomeSummaryCard({ summary }: HomeSummaryCardProps) {
+export function HomeSummaryCard({ homeLatest, dailyStats }: HomeSummaryCardProps) {
+  const pvNow = Math.round((homeLatest?.pv_w || 0) / 1000);
+  const loadNow = Math.round((homeLatest?.load_w || 0) / 1000);
+  const pvToday = Math.round((dailyStats?.prod_wh || 0) / 1000);
+  const useToday = Math.round((dailyStats?.use_wh || 0) / 1000);
+  const surplus = pvToday - useToday;
   const stats = [
     {
       label: 'Solar Production',
-      now: summary.solar_now_kw,
-      today: summary.solar_today_kwh,
+      now: pvNow,
+      today: pvToday,
       icon: Sun,
       color: 'text-surplus',
       bgColor: 'bg-surplus-light',
     },
     {
       label: 'Consumption',
-      now: summary.consumption_now_kw,
-      today: summary.consumption_today_kwh,
+      now: loadNow,
+      today: useToday,
       icon: Zap,
       color: 'text-consumption',
       bgColor: 'bg-consumption-light',
@@ -55,13 +61,13 @@ export function HomeSummaryCard({ summary }: HomeSummaryCardProps) {
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Surplus Today</span>
           <div className="flex items-center gap-2">
-            {summary.surplus_today_kwh >= 0 ? (
+            {surplus >= 0 ? (
               <TrendingUp className="h-4 w-4 text-surplus" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-consumption" />
+              <TrendingDown className="h-4 w-4 text-grid-import" />
             )}
-            <span className={`text-xl font-bold tabular-nums ${summary.surplus_today_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
-              {summary.surplus_today_kwh >= 0 ? '+' : ''}{formatKwh(summary.surplus_today_kwh)} kWh
+            <span className={`text-xl font-bold tabular-nums ${surplus >= 0 ? 'text-surplus' : 'text-grid-import'}`}>
+              {surplus >= 0 ? '+' : ''}{formatKwh(surplus)} kWh
             </span>
           </div>
         </div>

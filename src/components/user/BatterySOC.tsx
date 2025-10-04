@@ -1,14 +1,15 @@
 import { Card } from '@/components/ui/card';
 import { Battery, TrendingUp, TrendingDown } from 'lucide-react';
-import type { UserSummary } from '@/data/MockDataProvider';
+import type { UserHomeLatest, UserDailyStats } from '@/hooks/useUserData';
 import { formatPercent, formatKwh } from '@/lib/formatters';
 
 interface BatterySOCProps {
-  summary: UserSummary;
+  homeLatest: UserHomeLatest | null;
+  dailyStats: UserDailyStats | null;
 }
 
-export function BatterySOC({ summary }: BatterySOCProps) {
-  const percentage = summary.battery_soc_pct;
+export function BatterySOC({ homeLatest, dailyStats }: BatterySOCProps) {
+  const percentage = homeLatest?.soc_pct || 50;
   const circumference = 2 * Math.PI * 45;
   const offset = circumference - (percentage / 100) * circumference;
 
@@ -61,7 +62,7 @@ export function BatterySOC({ summary }: BatterySOCProps) {
           <div>
             <p className="text-sm text-muted-foreground">Charged Today</p>
             <p className="text-lg font-bold text-surplus tabular-nums">
-              {formatKwh(summary.battery_charge_today_kwh)} kWh
+              {formatKwh(Math.round((dailyStats?.prod_wh || 0) / 1000))} kWh
             </p>
           </div>
         </div>
@@ -70,7 +71,7 @@ export function BatterySOC({ summary }: BatterySOCProps) {
           <div>
             <p className="text-sm text-muted-foreground">Discharged Today</p>
             <p className="text-lg font-bold text-consumption tabular-nums">
-              {formatKwh(summary.battery_discharge_today_kwh)} kWh
+              {formatKwh(Math.round((dailyStats?.use_wh || 0) / 1000))} kWh
             </p>
           </div>
         </div>

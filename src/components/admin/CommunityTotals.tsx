@@ -1,40 +1,39 @@
 import { Card } from '@/components/ui/card';
 import { Sun, Zap, Download, Upload } from 'lucide-react';
-import type { AdminOverview } from '@/data/MockDataProvider';
+import type { CommunityToday } from '@/hooks/useAdminData';
 import { formatKwh } from '@/lib/formatters';
 
 interface CommunityTotalsProps {
-  overview: AdminOverview;
+  communityToday: CommunityToday | null;
 }
 
-export function CommunityTotals({ overview }: CommunityTotalsProps) {
-  const { community_totals } = overview;
+export function CommunityTotals({ communityToday }: CommunityTotalsProps) {
 
   const stats = [
     {
       label: 'Production',
-      value: community_totals.production_kwh_today,
+      value: Math.round((communityToday?.prod_wh || 0) / 1000),
       icon: Sun,
       color: 'text-surplus',
       bgColor: 'bg-surplus-light',
     },
     {
       label: 'Microgrid Used',
-      value: community_totals.microgrid_used_kwh_today,
+      value: Math.round((communityToday?.mg_used_wh || 0) / 1000),
       icon: Zap,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
     },
     {
       label: 'Grid Import',
-      value: community_totals.grid_import_kwh_today,
+      value: Math.round((communityToday?.grid_import_wh || 0) / 1000),
       icon: Download,
       color: 'text-grid-import',
       bgColor: 'bg-destructive/10',
     },
     {
       label: 'Grid Export',
-      value: community_totals.grid_export_kwh_today,
+      value: Math.round((communityToday?.grid_export_wh || 0) / 1000),
       icon: Upload,
       color: 'text-grid-export',
       bgColor: 'bg-grid-export/10',

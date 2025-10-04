@@ -1,40 +1,23 @@
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Upload, Download, AlertCircle, Shield } from 'lucide-react';
-import { formatKw, formatKwh } from '@/lib/formatters';
-
-interface GridDrawer {
-  id: string;
-  kw: number;
-}
-
-interface GridExporter {
-  id: string;
-  kw: number;
-}
+import { Upload, Download } from 'lucide-react';
+import { formatKw } from '@/lib/formatters';
+import type { GridExchangeNow, HomeLatest } from '@/hooks/useAdminData';
 
 interface GridExchangeCardProps {
-  toGridNowKwTotal: number;
-  toGridTodayKwhTotal: number;
-  fromGridNowKwTotal: number;
-  gridDrawersNow: GridDrawer[];
-  gridExportersNowTop?: GridExporter[];
-  unservedNeedKw: number;
-  isIslanded: boolean;
+  gridExchange: GridExchangeNow | null;
+  homes: HomeLatest[];
 }
 
-export function GridExchangeCard({
-  toGridNowKwTotal,
-  toGridTodayKwhTotal,
-  fromGridNowKwTotal,
-  gridDrawersNow,
-  gridExportersNowTop,
-  unservedNeedKw,
-  isIslanded,
-}: GridExchangeCardProps) {
+export function GridExchangeCard({ gridExchange, homes }: GridExchangeCardProps) {
+  const toGridNow = gridExchange?.to_grid_now_w_total || 0;
+  const fromGridNow = gridExchange?.from_grid_now_w_total || 0;
+  
+  const exporters = homes.filter(h => h.grid_export_w > 50).slice(0, 5);
+  const importers = homes.filter(h => h.grid_import_w > 50).slice(0, 5);
+
   return (
     <Card className="p-6 bg-gradient-card rounded-2xl shadow-card">
-      <h2 className="text-xl font-semibold mb-6">Grid Exchange (Now & Today)</h2>
+      <h2 className="text-xl font-semibold mb-6">Grid Exchange (Now)</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Column - To Grid (Export) */}
@@ -48,32 +31,22 @@ export function GridExchangeCard({
             <div>
               <p className="text-sm text-muted-foreground mb-1">Now</p>
               <p className="text-4xl font-semibold text-grid-export tabular-nums">
-                {formatKw(toGridNowKwTotal)}
+                {formatKw(Math.round(toGridNow / 1000))}
                 <span className="text-lg ml-2">kW</span>
               </p>
             </div>
-            
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Today</p>
-              <p className="text-xl font-semibold text-grid-export/80 tabular-nums">
-                {formatKwh(toGridTodayKwhTotal)}
-                <span className="text-sm ml-1">kWh</span>
-              </p>
-            </div>
 
-            {/* Top Exporters */}
-            {gridExportersNowTop && gridExportersNowTop.length > 0 && (
+            {exporters.length > 0 && (
               <div className="pt-3 border-t border-border/60">
                 <p className="text-xs text-muted-foreground mb-2">Top exporters now</p>
-                <div className="flex flex-wrap gap-2">
-                  {gridExportersNowTop.slice(0, 3).map((exporter) => (
-                    <Badge
-                      key={exporter.id}
-                      variant="outline"
-                      className="border-grid-export/40 text-grid-export bg-grid-export/10 tabular-nums"
-                    >
-                      {exporter.id} {formatKw(exporter.kw)} kW
-                    </Badge>
+                <div className="space-y-1">
+                  {exporters.map((home) => (
+                    <div key={home.home_id} className="flex justify-between text-sm">
+                      <span>{home.home_id}</span>
+                      <span className="font-semibold text-grid-export tabular-nums">
+                        {formatKw(Math.round(home.grid_export_w / 1000))} kW
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -92,24 +65,23 @@ export function GridExchangeCard({
             <div>
               <p className="text-sm text-muted-foreground mb-1">Now (Total)</p>
               <p className="text-4xl font-semibold text-grid-import tabular-nums">
-                {formatKw(fromGridNowKwTotal)}
+                {formatKw(Math.round(fromGridNow / 1000))}
                 <span className="text-lg ml-2">kW</span>
               </p>
             </div>
 
-            {/* Houses Drawing Now */}
-            {gridDrawersNow.length > 0 ? (
+            {importers.length > 0 ? (
               <div className="pt-3 border-t border-border/60">
-                <p className="text-xs text-muted-foreground mb-2">Houses drawing now</p>
+                <p className="text-xs text-muted-foreground mb-2">Houses importing now</p>
                 <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                  {gridDrawersNow.map((drawer) => (
+                  {importers.map((home) => (
                     <div
-                      key={drawer.id}
+                      key={home.home_id}
                       className="flex items-center justify-between p-2 rounded-lg bg-grid-import/10 border border-grid-import/20"
                     >
-                      <span className="font-medium text-foreground">{drawer.id}</span>
+                      <span className="font-medium text-foreground">{home.home_id}</span>
                       <span className="text-sm font-semibold text-grid-import tabular-nums">
-                        {formatKw(drawer.kw)} kW
+                        {formatKw(Math.round(home.grid_import_w / 1000))} kW
                       </span>
                     </div>
                   ))}
@@ -122,22 +94,6 @@ export function GridExchangeCard({
             )}
           </div>
         </div>
-      </div>
-
-      {/* Footer Chips */}
-      <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-border/60">
-        {unservedNeedKw > 0 && (
-          <Badge variant="outline" className="border-grid-import text-grid-import bg-grid-import/10">
-            <AlertCircle className="mr-1 h-3 w-3" />
-            Unserved: {formatKw(unservedNeedKw)} kW
-          </Badge>
-        )}
-        {isIslanded && (
-          <Badge variant="outline" className="border-consumption text-consumption bg-consumption/10">
-            <Shield className="mr-1 h-3 w-3" />
-            Islanded
-          </Badge>
-        )}
       </div>
     </Card>
   );

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 export type Role = 'admin' | 'user';
 
+const STORAGE_KEY = 'neighborgrid_auth';
+
 export interface AuthState {
   isAuthenticated: boolean;
   role: Role | null;
@@ -17,8 +19,6 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'ng.auth';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [authState, setAuthState] = useState<AuthState>({
@@ -28,18 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     homeId: null,
   });
 
-  // Hydrate from sessionStorage on mount
   useEffect(() => {
+    // Check for existing session on mount
     const stored = sessionStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed.isAuthenticated && parsed.role) {
-          setAuthState(parsed);
-        } else {
-          sessionStorage.removeItem(STORAGE_KEY);
-        }
-      } catch {
+        setAuthState(parsed);
+      } catch (e) {
         sessionStorage.removeItem(STORAGE_KEY);
       }
     }
@@ -69,7 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ ...authState, login, logout }}>
+    <AuthContext.Provider value={{
+      ...authState,
+      login,
+      logout
+    }}>
       {children}
     </AuthContext.Provider>
   );
