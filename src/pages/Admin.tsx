@@ -1,15 +1,15 @@
 import { useMockData } from '@/hooks/useMockData';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { HousesGrid } from '@/components/admin/HousesGrid';
-import { LiveRoutingPanel } from '@/components/admin/LiveRoutingPanel';
+import { GridExchangeCard } from '@/components/admin/GridExchangeCard';
 import { CommunityTotals } from '@/components/admin/CommunityTotals';
 import { FairRateCard } from '@/components/admin/FairRateCard';
 import { PmgGridTrend } from '@/components/admin/PmgGridTrend';
 
 export default function Admin() {
-  const { adminOverview, adminHouses, adminLive, adminTrends, manualTick } = useMockData();
+  const { adminOverview, adminHouses, adminGridExchange, adminTrends, manualTick } = useMockData();
 
-  if (!adminOverview || !adminLive || !adminTrends) {
+  if (!adminOverview || !adminGridExchange || !adminTrends) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-muted-foreground">Loading microgrid data...</p>
@@ -21,7 +21,7 @@ export default function Admin() {
     <div className="min-h-screen bg-background">
       <AdminHeader
         microgridId={adminOverview.microgrid_id}
-        lastUpdate={adminLive.updated_at}
+        lastUpdate={adminGridExchange.updated_at}
         onTick={manualTick}
       />
 
@@ -32,13 +32,21 @@ export default function Admin() {
           <HousesGrid houses={adminHouses} />
         </section>
 
-        {/* Live Routing and Community */}
+        {/* Grid Exchange and Community */}
+        <GridExchangeCard
+          toGridNowKwTotal={adminGridExchange.to_grid_now_kw_total}
+          toGridTodayKwhTotal={adminGridExchange.to_grid_today_kwh_total}
+          fromGridNowKwTotal={adminGridExchange.from_grid_now_kw_total}
+          gridDrawersNow={adminGridExchange.grid_drawers_now}
+          gridExportersNowTop={adminGridExchange.grid_exporters_now_top}
+          unservedNeedKw={adminGridExchange.unserved_need_kw}
+          isIslanded={adminGridExchange.is_islanded}
+        />
+
+        {/* Community Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <LiveRoutingPanel live={adminLive} />
-          <div className="space-y-8">
-            <CommunityTotals overview={adminOverview} />
-            <FairRateCard overview={adminOverview} />
-          </div>
+          <CommunityTotals overview={adminOverview} />
+          <FairRateCard overview={adminOverview} />
         </div>
 
         {/* Trend Chart */}

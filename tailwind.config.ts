@@ -59,7 +59,10 @@ export default {
           import: "hsl(var(--grid-import))",
           export: "hsl(var(--grid-export))",
         },
-        battery: "hsl(var(--battery))",
+        battery: {
+          DEFAULT: "hsl(var(--battery))",
+          reserve: "hsl(var(--battery-reserve))",
+        },
       },
       backgroundImage: {
         'gradient-energy': 'var(--gradient-energy)',

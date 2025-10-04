@@ -2,109 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Night Theme Design System - Tesla-inspired dark UI
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 210 25% 98%;
-    --foreground: 210 12% 12%;
+    /* Night Theme Colors */
+    --background: 218 23% 7%;  /* #0B0F14 */
+    --foreground: 220 9% 92%;  /* #E5E7EB */
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 12% 12%;
+    --card: 217 20% 9%;  /* #0E1117 */
+    --card-foreground: 220 9% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 12% 12%;
+    --popover: 217 20% 9%;
+    --popover-foreground: 220 9% 92%;
 
-    --primary: 174 62% 47%;
+    --primary: 186 90% 52%;  /* #22D3EE cyan */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 25% 95%;
-    --secondary-foreground: 210 12% 12%;
+    --secondary: 215 16% 13%;  /* #111826 */
+    --secondary-foreground: 220 9% 92%;
 
-    --muted: 210 25% 95%;
-    --muted-foreground: 210 10% 45%;
+    --muted: 215 16% 13%;
+    --muted-foreground: 218 11% 65%;  /* #9CA3AF */
 
-    --accent: 174 62% 47%;
+    --accent: 186 90% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;  /* #EF4444 red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 174 62% 47%;
+    --border: 215 16% 17%;  /* #1F2937 @ 60% */
+    --input: 215 16% 17%;
+    --ring: 186 90% 52%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Energy-specific colors */
-    --surplus: 174 62% 47%;
-    --surplus-light: 174 55% 85%;
-    --consumption: 38 92% 50%;
-    --consumption-light: 38 90% 85%;
-    --grid-import: 0 72% 51%;
-    --grid-export: 217 91% 60%;
-    --battery: 174 62% 47%;
+    /* Energy-specific colors - Night Theme */
+    --surplus: 186 90% 52%;  /* #22D3EE cyan - sharing/to microgrid */
+    --surplus-light: 186 90% 20%;
+    --consumption: 38 92% 50%;  /* #F59E0B amber - deficit/from microgrid */
+    --consumption-light: 38 90% 20%;
+    --grid-import: 0 84% 60%;  /* #EF4444 red - import from grid */
+    --grid-export: 213 94% 68%;  /* #60A5FA blue - export to grid */
+    --battery: 152 69% 51%;  /* #10B981 green */
+    --battery-reserve: 218 20% 24%;  /* #374151 */
     
     /* Gradients */
-    --gradient-energy: linear-gradient(135deg, hsl(174 62% 47%) 0%, hsl(174 55% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 25% 98%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(174 62% 47% / 0.1) 0%, hsl(217 91% 60% / 0.1) 100%);
+    --gradient-energy: linear-gradient(135deg, hsl(186 90% 52%) 0%, hsl(186 80% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(217 20% 9%) 0%, hsl(217 18% 11%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(186 90% 52% / 0.15) 0%, hsl(213 94% 68% / 0.15) 100%);
     
-    /* Shadows */
-    --shadow-soft: 0 2px 8px hsl(210 12% 12% / 0.08);
-    --shadow-card: 0 4px 16px hsl(210 12% 12% / 0.1);
-    --shadow-glow: 0 0 20px hsl(174 62% 47% / 0.3);
-  }
-
-  .dark {
-    --background: 210 18% 11%;
-    --foreground: 210 20% 98%;
-
-    --card: 210 15% 15%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 210 15% 15%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 174 62% 47%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 15% 20%;
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 210 15% 20%;
-    --muted-foreground: 210 15% 65%;
-
-    --accent: 174 62% 47%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 210 15% 25%;
-    --input: 210 15% 25%;
-    --ring: 174 62% 47%;
-    
-    /* Energy-specific colors (adjusted for dark) */
-    --surplus: 174 62% 47%;
-    --surplus-light: 174 55% 25%;
-    --consumption: 38 92% 50%;
-    --consumption-light: 38 90% 25%;
-    --grid-import: 0 72% 51%;
-    --grid-export: 217 91% 60%;
-    --battery: 174 62% 47%;
-    
-    /* Gradients */
-    --gradient-energy: linear-gradient(135deg, hsl(174 62% 47%) 0%, hsl(174 55% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(210 15% 15%) 0%, hsl(210 15% 18%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(174 62% 47% / 0.15) 0%, hsl(217 91% 60% / 0.15) 100%);
-    
-    /* Shadows */
-    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
-    --shadow-card: 0 4px 16px hsl(0 0% 0% / 0.4);
-    --shadow-glow: 0 0 20px hsl(174 62% 47% / 0.4);
+    /* Shadows - Dark premium look */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 20px hsl(186 90% 52% / 0.4);
   }
 }
 
@@ -115,6 +68,9 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    font-size: 16px;
+    font-feature-settings: 'tnum' 1;  /* Tabular numerals */
   }
 }
 
@@ -135,7 +91,7 @@ All colors MUST be HSL.
   }
   
   .data-update {
-    animation: data-flash 0.6s ease-out;
+    animation: data-flash 0.15s ease-out;
   }
   
   @keyframes data-flash {
@@ -145,5 +101,9 @@ All colors MUST be HSL.
     100% {
       background-color: transparent;
     }
+  }
+
+  .tabular-nums {
+    font-feature-settings: 'tnum' 1;
   }
 }

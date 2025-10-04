@@ -22,7 +22,7 @@ export function useMockData() {
   return {
     adminOverview: mockDataProvider.getAdminOverview(),
     adminHouses: mockDataProvider.getAdminHouses(),
-    adminLive: mockDataProvider.getAdminLive(),
+    adminGridExchange: mockDataProvider.getAdminGridExchange(),
     adminTrends: mockDataProvider.getAdminTrends(),
     getUserSummary: (homeId: string) => mockDataProvider.getUserSummary(homeId),
     getUserPatterns: (homeId: string) => mockDataProvider.getUserPatterns(homeId),

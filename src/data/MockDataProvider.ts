@@ -30,11 +30,15 @@ type AdminHouse = {
   credits_month_net_kwh: number;
 };
 
-type AdminLive = {
+type AdminGridExchange = {
   updated_at: string;
-  pairings: { from: string; to: string; kw: number }[];
+  to_grid_now_kw_total: number;
+  to_grid_today_kwh_total: number;
+  from_grid_now_kw_total: number;
+  grid_drawers_now: { id: string; kw: number }[];
+  grid_exporters_now_top?: { id: string; kw: number }[];
   unserved_need_kw: number;
-  sent_to_grid_kw: number;
+  is_islanded: boolean;
 };
 
 type AdminTrends = {
@@ -88,7 +92,7 @@ type UserForecast = {
 class MockDataProvider {
   private adminOverview: AdminOverview | null = null;
   private adminHouses: AdminHouse[] = [];
-  private adminLive: AdminLive | null = null;
+  private adminGridExchange: AdminGridExchange | null = null;
   private adminTrends: AdminTrends | null = null;
   private userSummaries: Map<string, UserSummary> = new Map();
   private userPatterns: Map<string, UserPatterns> = new Map();
@@ -105,16 +109,16 @@ class MockDataProvider {
 
   private async loadInitialData() {
     try {
-      const [overview, houses, live, trends] = await Promise.all([
+      const [overview, houses, gridExchange, trends] = await Promise.all([
         fetch('/mock/admin_overview.json').then(r => r.json()),
         fetch('/mock/admin_houses.json').then(r => r.json()),
-        fetch('/mock/admin_live.json').then(r => r.json()),
+        fetch('/mock/admin_grid_exchange.json').then(r => r.json()),
         fetch('/mock/admin_trends.json').then(r => r.json()),
       ]);
 
       this.adminOverview = overview;
       this.adminHouses = houses;
-      this.adminLive = live;
+      this.adminGridExchange = gridExchange;
       this.adminTrends = trends;
 
       // Load user data for H7 as default
@@ -159,12 +163,13 @@ class MockDataProvider {
       }));
     }
 
-    // Update live routing
-    if (this.adminLive) {
-      this.adminLive = {
-        ...this.adminLive,
+    // Update grid exchange
+    if (this.adminGridExchange) {
+      this.adminGridExchange = {
+        ...this.adminGridExchange,
         updated_at: new Date().toISOString(),
-        sent_to_grid_kw: Math.max(0, (Math.random() - 0.7) * 0.5),
+        to_grid_now_kw_total: Math.max(0, this.adminGridExchange.to_grid_now_kw_total + (Math.random() - 0.5) * 0.2),
+        from_grid_now_kw_total: Math.max(0, this.adminGridExchange.from_grid_now_kw_total + (Math.random() - 0.5) * 0.3),
       };
     }
 
@@ -200,8 +205,8 @@ class MockDataProvider {
     return this.adminHouses;
   }
 
-  getAdminLive(): AdminLive | null {
-    return this.adminLive;
+  getAdminGridExchange(): AdminGridExchange | null {
+    return this.adminGridExchange;
   }
 
   getAdminTrends(): AdminTrends | null {
@@ -232,4 +237,4 @@ class MockDataProvider {
 }
 
 export const mockDataProvider = new MockDataProvider();
-export type { AdminOverview, AdminHouse, AdminLive, AdminTrends, UserSummary, UserPatterns, UserSharing, UserForecast };
+export type { AdminOverview, AdminHouse, AdminGridExchange, AdminTrends, UserSummary, UserPatterns, UserSharing, UserForecast };
