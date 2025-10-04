@@ -10,9 +10,9 @@ import { toast } from '@/hooks/use-toast';
 export default function LoginUser() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [homeId, setHomeId] = useState('');
+  const [email, setEmail] = useState('user@demo.com');
+  const [password, setPassword] = useState('demo123');
+  const [homeId, setHomeId] = useState('H7');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -34,25 +34,9 @@ export default function LoginUser() {
   const isDisabled = !email || !password;
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Left panel - illustration */}
-      <div 
-        className="hidden lg:flex lg:w-1/2 items-center justify-center p-12"
-        style={{ backgroundColor: 'var(--surface-2)' }}
-      >
-        <div className="max-w-md">
-          <div className="w-64 h-64 mx-auto opacity-40">
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M100 20L60 50V90L100 120L140 90V50L100 20Z" stroke="var(--acc-green)" strokeWidth="2" fill="var(--acc-green)" fillOpacity="0.1"/>
-              <path d="M100 80L80 95V125L100 140L120 125V95L100 80Z" stroke="var(--acc-cyan)" strokeWidth="2" fill="var(--acc-cyan)" fillOpacity="0.1"/>
-              <circle cx="100" cy="100" r="60" stroke="var(--acc-green)" strokeWidth="1" strokeDasharray="4 4" opacity="0.3"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Right panel - form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+    <div className="min-h-screen flex items-center justify-center p-8" style={{ backgroundColor: 'var(--bg)' }}>
+      {/* Centered form */}
+      <div className="w-full flex items-center justify-center">
         <div 
           className="w-full max-w-md p-8 rounded-2xl"
           style={{ 
@@ -78,6 +62,24 @@ export default function LoginUser() {
               Sign in to NeighborGrid
             </h2>
             <p style={{ color: 'var(--text-dim)' }}>For homeowners</p>
+          </div>
+
+          {/* Demo credentials notice */}
+          <div 
+            className="p-3 rounded-lg mb-6"
+            style={{ 
+              backgroundColor: 'var(--surface-2)',
+              border: '1px solid var(--border)'
+            }}
+          >
+            <p className="text-xs font-medium mb-1" style={{ color: 'var(--text)' }}>
+              Demo Credentials
+            </p>
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              Email: user@demo.com<br />
+              Password: demo123<br />
+              Home ID: H7
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
