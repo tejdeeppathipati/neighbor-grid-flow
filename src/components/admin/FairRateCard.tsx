@@ -7,49 +7,48 @@ interface FairRateCardProps {
 }
 
 export function FairRateCard({ overview }: FairRateCardProps) {
-  const { pricing } = overview;
+  const fairRate = overview?.pricing.fair_rate_per_kwh;
+  const utilityExport = overview?.pricing.utility_export_per_kwh;
+  const utilityImport = overview?.pricing.utility_import_per_kwh;
 
   return (
-    <Card className="p-6 bg-gradient-energy text-white">
-      <h3 className="text-lg font-bold mb-4">Fair Rate Economics</h3>
-      
+    <Card className="p-6 bg-gradient-to-br from-[hsl(var(--acc-cyan))] to-[hsl(var(--acc-green))] text-white rounded-[var(--radius-xl,16px)] shadow-[var(--shadow-glow)] border-0">
+      <h2 className="text-xl font-semibold mb-4">Fair-Rate Economics</h2>
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm opacity-90">Microgrid Fair Rate</span>
-          <span className="text-xl font-bold">${pricing.fair_rate_per_kwh.toFixed(2)}/kWh</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/20">
-          <div>
-            <div className="flex items-center gap-1 text-sm opacity-90 mb-1">
-              <TrendingUp className="h-3 w-3" />
-              <span>Producer Earns</span>
-            </div>
-            <p className="text-lg font-bold">${pricing.fair_rate_per_kwh.toFixed(2)}</p>
-            <p className="text-xs opacity-75">
-              vs ${pricing.utility_export_per_kwh.toFixed(2)} grid export
-            </p>
+        <div className="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            <span className="text-sm">Producer earns</span>
           </div>
-
-          <div>
-            <div className="flex items-center gap-1 text-sm opacity-90 mb-1">
-              <TrendingDown className="h-3 w-3" />
-              <span>Consumer Pays</span>
-            </div>
-            <p className="text-lg font-bold">${pricing.fair_rate_per_kwh.toFixed(2)}</p>
-            <p className="text-xs opacity-75">
-              vs ${pricing.utility_import_per_kwh.toFixed(2)} grid import
+          <div className="text-right">
+            <p className="text-lg font-semibold">
+              {fairRate !== undefined ? `$${fairRate.toFixed(2)}` : '—'}
+            </p>
+            <p className="text-xs opacity-80">
+              vs {utilityExport !== undefined ? `$${utilityExport.toFixed(2)}` : '—'} export
             </p>
           </div>
         </div>
-
-        <div className="pt-2 border-t border-white/20">
-          <p className="text-sm opacity-90">
-            💡 Local sharing benefits both sides — producers earn {((pricing.fair_rate_per_kwh / pricing.utility_export_per_kwh - 1) * 100).toFixed(0)}% more, 
-            consumers save {((1 - pricing.fair_rate_per_kwh / pricing.utility_import_per_kwh) * 100).toFixed(0)}%
-          </p>
+        
+        <div className="flex items-center justify-between p-3 bg-white/10 rounded-lg backdrop-blur">
+          <div className="flex items-center gap-2">
+            <TrendingDown className="h-5 w-5" />
+            <span className="text-sm">Consumer pays</span>
+          </div>
+          <div className="text-right">
+            <p className="text-lg font-semibold">
+              {fairRate !== undefined ? `$${fairRate.toFixed(2)}` : '—'}
+            </p>
+            <p className="text-xs opacity-80">
+              vs {utilityImport !== undefined ? `$${utilityImport.toFixed(2)}` : '—'} import
+            </p>
+          </div>
         </div>
       </div>
+      
+      <p className="mt-4 text-sm opacity-90 text-center">
+        Local sharing benefits both sides — producers earn more than export rate; neighbors pay less than import rate.
+      </p>
     </Card>
   );
 }
