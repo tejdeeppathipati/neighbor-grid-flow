@@ -1,71 +1,102 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import type { User, Session } from '@supabase/supabase-js';
 
 export type Role = 'admin' | 'user';
 
 export interface AuthState {
   isAuthenticated: boolean;
   role: Role | null;
-  userId?: string | null;
+  userId: string | null;
+  user: User | null;
+  session: Session | null;
 }
 
 interface AuthContextType extends AuthState {
-  login: (role: Role, userId?: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'ng.auth';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const [authState, setAuthState] = useState<AuthState>({
-    isAuthenticated: false,
-    role: null,
-    userId: null,
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Hydrate from sessionStorage on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.isAuthenticated && parsed.role) {
-          setAuthState(parsed);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch user role from database
+          const { data } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+          
+          setRole(data?.role || null);
         } else {
-          sessionStorage.removeItem(STORAGE_KEY);
+          setRole(null);
         }
-      } catch {
-        sessionStorage.removeItem(STORAGE_KEY);
+        setLoading(false);
       }
-    }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        supabase
+          .from('users')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            setRole(data?.role || null);
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (role: Role, userId?: string) => {
-    const newState: AuthState = {
-      isAuthenticated: true,
-      role,
-      userId: userId || null,
-    };
-    setAuthState(newState);
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-  };
-
-  const logout = () => {
-    const newState: AuthState = {
-      isAuthenticated: false,
-      role: null,
-      userId: null,
-    };
-    setAuthState(newState);
-    sessionStorage.removeItem(STORAGE_KEY);
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setRole(null);
     navigate('/login/user');
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center" style={{ color: 'var(--text-dim)' }}>Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ ...authState, login, logout }}>
+    <AuthContext.Provider value={{
+      isAuthenticated: !!user,
+      role,
+      userId: user?.id || null,
+      user,
+      session,
+      logout
+    }}>
       {children}
     </AuthContext.Provider>
   );

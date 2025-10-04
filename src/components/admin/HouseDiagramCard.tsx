@@ -1,17 +1,17 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sun, Home, Battery, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-import type { AdminHouse } from '@/data/MockDataProvider';
-import { formatKw, formatKwh, formatCredits, formatPercent } from '@/lib/formatters';
+import type { HomeLatest } from '@/hooks/useAdminData';
+import { formatKw, formatPercent } from '@/lib/formatters';
 
 interface HouseDiagramCardProps {
-  house: AdminHouse;
+  home: HomeLatest;
 }
 
-export function HouseDiagramCard({ house }: HouseDiagramCardProps) {
-  const isExporting = house.to_microgrid_now_kw > 0.5;
-  const isImporting = house.from_microgrid_now_kw > 0.5;
-  const creditsNet = house.credits_month_net_kwh;
+export function HouseDiagramCard({ home }: HouseDiagramCardProps) {
+  const pvNow = Math.round(home.pv_w / 1000);
+  const isExporting = home.grid_export_w > 500;
+  const isImporting = home.grid_import_w > 500;
 
   return (
     <Card className="p-5 bg-gradient-card rounded-2xl shadow-card hover:shadow-glow transition-all duration-200">
@@ -39,10 +39,10 @@ export function HouseDiagramCard({ house }: HouseDiagramCardProps) {
               y="55"
               width="40"
               height="25"
-              fill={house.solar_now_kw > 0.5 ? 'url(#solarGlow)' : '#1C2430'}
+              fill={pvNow > 0 ? 'url(#solarGlow)' : '#1C2430'}
               stroke="#22D3EE"
-              strokeWidth={house.solar_now_kw > 0.5 ? '2' : '1'}
-              opacity={house.solar_now_kw > 0.5 ? '1' : '0.5'}
+              strokeWidth={pvNow > 0 ? '2' : '1'}
+              opacity={pvNow > 0 ? '1' : '0.5'}
             />
             
             {/* Window */}
@@ -53,9 +53,9 @@ export function HouseDiagramCard({ house }: HouseDiagramCardProps) {
             <rect x="145" y="110" width="10" height="30" fill="#0F141A" stroke="#1BD18A" strokeWidth="2" />
             <rect
               x="145"
-              y={110 + (30 * (100 - house.battery_soc_pct) / 100)}
+              y={110 + (30 * (100 - home.soc_pct) / 100)}
               width="10"
-              height={30 * house.battery_soc_pct / 100}
+              height={30 * home.soc_pct / 100}
               fill="#1BD18A"
               opacity="0.7"
             />
@@ -82,21 +82,21 @@ export function HouseDiagramCard({ house }: HouseDiagramCardProps) {
             <g>
               <Sun className="w-4 h-4" x="95" y="28" fill="#22D3EE" stroke="#22D3EE" />
               <text x="100" y="25" fill="#22D3EE" fontSize="11" fontWeight="600" textAnchor="middle">
-                {formatKw(house.solar_now_kw)} kW
+                {formatKw(pvNow)} kW
               </text>
             </g>
 
             {/* Callout: Home consumption */}
             <g>
               <text x="100" y="95" fill="#F6A723" fontSize="11" fontWeight="600" textAnchor="middle">
-                {formatKw(house.consumption_now_kw)} kW
+                {formatKw(Math.round(home.load_w / 1000))} kW
               </text>
             </g>
 
             {/* Callout: Battery */}
             <g>
               <text x="150" y="105" fill="#1BD18A" fontSize="10" fontWeight="600" textAnchor="middle">
-                {formatPercent(house.battery_soc_pct)}%
+                {formatPercent(home.soc_pct)}%
               </text>
             </g>
 
@@ -104,14 +104,14 @@ export function HouseDiagramCard({ house }: HouseDiagramCardProps) {
             {isExporting && (
               <g>
                 <text x="175" y="115" fill="#6BA8FF" fontSize="10" fontWeight="600">
-                  → {formatKw(house.to_microgrid_now_kw)}
+                  → {formatKw(Math.round(home.grid_export_w / 1000))}
                 </text>
               </g>
             )}
             {isImporting && (
               <g>
                 <text x="175" y="115" fill="#F05252" fontSize="10" fontWeight="600">
-                  ← {formatKw(house.from_microgrid_now_kw)}
+                  ← {formatKw(Math.round(home.grid_import_w / 1000))}
                 </text>
               </g>
             )}
@@ -120,50 +120,26 @@ export function HouseDiagramCard({ house }: HouseDiagramCardProps) {
           {/* House ID badge at top */}
           <div className="absolute top-0 left-0">
             <Badge variant="outline" className="font-semibold border-border bg-card/80 backdrop-blur">
-              {house.id}
+              {home.home_id}
             </Badge>
           </div>
         </div>
 
         {/* Right: KPIs Column (40%) */}
         <div className="flex-[2] flex flex-col justify-center space-y-3">
-          {/* Sharing (to microgrid) */}
+          {/* Current State */}
           <div>
-            <p className="text-xs text-muted-foreground mb-0.5">Sharing</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-surplus tabular-nums">
-                {formatKw(house.to_microgrid_now_kw)}
-              </span>
-              <span className="text-sm text-muted-foreground">kW now</span>
-            </div>
-            <p className="text-xs text-surplus/80 tabular-nums">
-              {formatKwh(house.to_microgrid_today_kwh)} kWh today
+            <p className="text-xs text-muted-foreground mb-0.5">Solar / Load</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {formatKw(pvNow)} / {formatKw(Math.round(home.load_w / 1000))} kW
             </p>
           </div>
 
-          {/* Receiving (from microgrid) */}
+          {/* Sharing */}
           <div>
-            <p className="text-xs text-muted-foreground mb-0.5">Receiving</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-consumption tabular-nums">
-                {formatKw(house.from_microgrid_now_kw)}
-              </span>
-              <span className="text-sm text-muted-foreground">kW now</span>
-            </div>
-            <p className="text-xs text-consumption/80 tabular-nums">
-              {formatKwh(house.from_microgrid_today_kwh)} kWh today
-            </p>
-          </div>
-
-          {/* Credits Net (MTD) */}
-          <div className="pt-2 border-t border-border/60">
-            <p className="text-xs text-muted-foreground mb-0.5">Credits (Net MTD)</p>
-            <p
-              className={`text-xl font-semibold tabular-nums ${
-                creditsNet > 0 ? 'text-surplus' : creditsNet < 0 ? 'text-consumption' : 'text-muted-foreground'
-              }`}
-            >
-              {formatCredits(creditsNet)} kWh
+            <p className="text-xs text-muted-foreground mb-0.5">Grid Sharing</p>
+            <p className="text-lg font-semibold text-surplus tabular-nums">
+              {formatKw(Math.round(home.sharing_w / 1000))} kW
             </p>
           </div>
 
