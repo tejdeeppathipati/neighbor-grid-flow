@@ -5,6 +5,7 @@
 import express from "express";
 import cors from "cors";
 import { MicrogridEngine } from "./engine.js";
+import { supabase } from "./supabase.js";
 import type { AdminStateResponse, UserStateResponse, SSEDelta } from "./types.js";
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Initialize engine
 const engine = new MicrogridEngine(42);
+const MICROGRID_ID = "00000000-0000-0000-0000-000000000001"; // Default microgrid ID (matches database)
 
 // SSE clients
 const sseClients: express.Response[] = [];
@@ -23,8 +25,8 @@ const sseClients: express.Response[] = [];
 // Start simulation
 engine.start("accelerated");
 
-// Listen for ticks and broadcast via SSE
-engine.on("tick", (delta: SSEDelta) => {
+// Listen for ticks and broadcast via SSE + write to database
+engine.on("tick", async (delta: SSEDelta) => {
   const data = `data: ${JSON.stringify(delta)}\n\n`;
   sseClients.forEach(client => {
     try {
@@ -33,7 +35,71 @@ engine.on("tick", (delta: SSEDelta) => {
       console.error("SSE write error:", err);
     }
   });
+
+  // Write to Supabase database
+  try {
+    await writeTickToDatabase(delta);
+  } catch (err) {
+    console.error("Database write error:", err);
+  }
 });
+
+// Function to write tick data to Supabase
+async function writeTickToDatabase(delta: SSEDelta) {
+  const timestamp = delta.ts;
+  
+  // Write individual home states
+  const homeStates = delta.homes.map(home => ({
+    microgrid_id: MICROGRID_ID,
+    home_id: home.id,
+    ts: timestamp,
+    pv_w: home.pv * 1000, // Convert kW to W
+    load_w: home.load * 1000,
+    soc_pct: home.soc,
+    sharing_w: home.share * 1000,
+    receiving_w: home.recv * 1000,
+    grid_import_w: home.imp * 1000,
+    grid_export_w: home.exp * 1000,
+    credits_delta_wh: home.creditsDelta * 1000
+  }));
+
+  // Write community state
+  const communityState = {
+    microgrid_id: MICROGRID_ID,
+    ts: timestamp,
+    production_w: delta.community.prod * 1000,
+    microgrid_used_w: delta.community.mg_used * 1000,
+    grid_import_w: delta.grid.imp * 1000,
+    grid_export_w: delta.grid.exp * 1000,
+    unserved_w: delta.community.unserved * 1000
+  };
+
+  // Update simulation clock
+  const clockUpdate = {
+    microgrid_id: MICROGRID_ID,
+    sim_time: timestamp,
+    last_tick_at: new Date().toISOString(),
+    mode: "accelerated" as const,
+    speed: 1.0
+  };
+
+  // Execute database writes
+  console.log(`📊 Writing to database: ${homeStates.length} homes, timestamp: ${timestamp}`);
+  
+  const [tickResult, communityResult, clockResult] = await Promise.all([
+    supabase.from('tick_state').upsert(homeStates),
+    supabase.from('tick_state_community').upsert(communityState),
+    supabase.from('simulation_clock').upsert(clockUpdate)
+  ]);
+  
+  if (tickResult.error) console.error("❌ Tick state error:", tickResult.error);
+  if (communityResult.error) console.error("❌ Community state error:", communityResult.error);
+  if (clockResult.error) console.error("❌ Clock error:", clockResult.error);
+  
+  if (!tickResult.error && !communityResult.error && !clockResult.error) {
+    console.log("✅ Database write successful");
+  }
+}
 
 // Section 7: API Endpoints
 

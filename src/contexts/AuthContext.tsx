@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: true,
       role,
       userId: role === 'admin' ? userIdOrHomeId || null : null,
-      homeId: role === 'user' ? userIdOrHomeId || 'H001' : null,
+      homeId: role === 'user' ? userIdOrHomeId || 'H1' : null,
     };
     setAuthState(newState);
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newState));

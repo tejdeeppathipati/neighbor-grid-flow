@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 const Admin = lazy(() => import("./pages/Admin"));
 const AdminCommunity = lazy(() => import("./pages/AdminCommunity"));
 const AdminLive = lazy(() => import("./pages/AdminLive"));
+const AdminLiveDebug = lazy(() => import("./pages/AdminLiveDebug"));
 const UserApp = lazy(() => import("./pages/UserApp"));
 const UserAppLive = lazy(() => import("./pages/UserAppLive"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -56,6 +57,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireRole="admin">
                     <AdminLive />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/debug" 
+                element={
+                  <ProtectedRoute requireRole="admin">
+                    <AdminLiveDebug />
                   </ProtectedRoute>
                 } 
               />

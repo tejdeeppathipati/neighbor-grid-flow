@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, Activity, Battery, TrendingUp, TrendingDown, Play, Pause, RotateCcw, CloudRain, Flame, Car, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { useAdminData } from "@/hooks/useAdminData";
 
 interface SSEHome {
   id: string;
@@ -41,67 +42,38 @@ interface ChartDataPoint {
 }
 
 export default function AdminLive() {
-  const [liveData, setLiveData] = useState<SSEData | null>(null);
-  const [connected, setConnected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const maxDataPoints = 120; // Keep last 120 points (1 minute in accelerated mode)
+  const maxDataPoints = 60; // Keep last 60 points (1 hour of data)
+  
+  // Use Supabase data instead of SSE
+  const { gridExchange, communityToday, homes, tariff, loading, error } = useAdminData("00000000-0000-0000-0000-000000000001");
 
-  // Connect to SSE stream
+  // Process database data for chart
   useEffect(() => {
-    const es = new EventSource("http://localhost:3001/stream");
+    if (homes.length > 0 && communityToday && gridExchange) {
+      const time = new Date();
+      const totalConsumption = homes.reduce((sum, h) => sum + h.load_w, 0) / 1000; // Convert W to kW
+      
+      const newPoint: ChartDataPoint = {
+        time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: time.getTime(),
+        production: Math.round(communityToday.prod_wh / 1000), // Convert Wh to kWh
+        consumption: Math.round(totalConsumption),
+        shared: Math.round(communityToday.mg_used_wh / 1000 * 10) / 10,
+        gridImport: Math.round(gridExchange.from_grid_now_w_total / 1000),
+        gridExport: Math.round(gridExchange.to_grid_now_w_total / 1000),
+      };
 
-    es.onopen = () => {
-      console.log("✅ Connected to live simulator");
-      setConnected(true);
-      setError(null);
-    };
-
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        setLiveData(data);
-
-        // Add to chart data
-        const time = new Date(data.ts);
-        const totalConsumption = data.homes.reduce((sum: number, h: SSEHome) => sum + h.load, 0);
-        
-        const newPoint: ChartDataPoint = {
-          time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-          timestamp: time.getTime(),
-          production: Math.round(data.community.prod),
-          consumption: Math.round(totalConsumption),
-          shared: Math.round(data.community.mg_used * 10) / 10,
-          gridImport: Math.round(data.grid.imp),
-          gridExport: Math.round(data.grid.exp),
-        };
-
-        setChartData(prev => {
-          const updated = [...prev, newPoint];
-          // Keep only last N points
-          if (updated.length > maxDataPoints) {
-            return updated.slice(updated.length - maxDataPoints);
-          }
-          return updated;
-        });
-      } catch (err) {
-        console.error("Failed to parse SSE data:", err);
-      }
-    };
-
-    es.onerror = (err) => {
-      console.error("SSE connection error:", err);
-      setConnected(false);
-      setError("Connection lost. Make sure simulator is running at http://localhost:3001");
-    };
-
-    setEventSource(es);
-
-    return () => {
-      es.close();
-    };
-  }, []);
+      setChartData(prev => {
+        const updated = [...prev, newPoint];
+        // Keep only last N points
+        if (updated.length > maxDataPoints) {
+          return updated.slice(updated.length - maxDataPoints);
+        }
+        return updated;
+      });
+    }
+  }, [homes, communityToday, gridExchange]);
 
   // Control functions
   const handlePause = async () => {
@@ -128,58 +100,54 @@ export default function AdminLive() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <AdminHeader />
+        <AdminHeader microgridId="00000000-0000-0000-0000-000000000001" />
         <div className="max-w-7xl mx-auto p-6">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
           <div className="mt-4 text-sm text-muted-foreground">
-            <p>To start the simulator:</p>
-            <pre className="mt-2 p-4 bg-muted rounded">
-              cd simulator-backend{"\n"}
-              npm run dev
-            </pre>
+            <p>Database connection error. Make sure the backend is running and writing to Supabase.</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!liveData) {
+  if (loading || !communityToday || !gridExchange) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Activity className="h-12 w-12 animate-pulse mx-auto text-primary" />
-          <p className="mt-4 text-muted-foreground">Connecting to live simulator...</p>
+          <p className="mt-4 text-muted-foreground">Loading live data from database...</p>
         </div>
       </div>
     );
   }
 
-  const time = new Date(liveData.ts);
-  const totalProducing = liveData.homes.filter(h => h.pv > 0).length;
-  const totalSharing = liveData.homes.filter(h => h.share > 0).length;
-  const avgSOC = Math.round(liveData.homes.reduce((sum, h) => sum + h.soc, 0) / liveData.homes.length);
+  const time = new Date();
+  const totalProducing = homes.filter(h => h.pv_w > 0).length;
+  const totalSharing = homes.filter(h => h.sharing_w > 0).length;
+  const avgSOC = homes.length > 0 ? Math.round(homes.reduce((sum, h) => sum + h.soc_pct, 0) / homes.length) : 0;
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminHeader />
+      <AdminHeader microgridId="00000000-0000-0000-0000-000000000001" />
 
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Activity className={`h-8 w-8 ${connected ? "text-green-500 animate-pulse" : "text-gray-400"}`} />
+              <Activity className="h-8 w-8 text-green-500 animate-pulse" />
               Live Simulator
             </h1>
             <p className="text-muted-foreground mt-1">
-              Real-time energy flow • Updated every 0.5s • 20 homes active
+              Real-time energy flow • Updated every minute • 20 homes active
             </p>
           </div>
-          <Badge variant={connected ? "default" : "secondary"} className="text-sm">
-            {connected ? "🟢 LIVE" : "⚫ Disconnected"}
+          <Badge variant="default" className="text-sm">
+            🟢 LIVE
           </Badge>
         </div>
 
@@ -246,9 +214,9 @@ export default function AdminLive() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{liveData.community.prod} kW</div>
+              <div className="text-3xl font-bold">{Math.round(communityToday.prod_wh / 1000)} kW</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {totalProducing} of 20 homes producing
+                {totalProducing} of {homes.length} homes producing
               </p>
             </CardContent>
           </Card>
@@ -261,7 +229,7 @@ export default function AdminLive() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{liveData.community.mg_used.toFixed(1)} kW</div>
+              <div className="text-3xl font-bold">{(communityToday.mg_used_wh / 1000).toFixed(1)} kW</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {totalSharing} homes sharing
               </p>
@@ -271,7 +239,7 @@ export default function AdminLive() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                {liveData.grid.imp > 0 ? (
+                {gridExchange && gridExchange.from_grid_now_w_total > 0 ? (
                   <TrendingDown className="h-4 w-4 text-red-500" />
                 ) : (
                   <TrendingUp className="h-4 w-4 text-blue-500" />
@@ -281,14 +249,14 @@ export default function AdminLive() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {liveData.grid.imp > 0 ? (
-                  <span className="text-red-500">↓ {liveData.grid.imp} kW</span>
+                {gridExchange.from_grid_now_w_total > 0 ? (
+                  <span className="text-red-500">↓ {Math.round(gridExchange.from_grid_now_w_total / 1000)} kW</span>
                 ) : (
-                  <span className="text-blue-500">↑ {liveData.grid.exp} kW</span>
+                  <span className="text-blue-500">↑ {Math.round(gridExchange.to_grid_now_w_total / 1000)} kW</span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {liveData.grid.imp > 0 ? "Importing" : "Exporting"}
+                {gridExchange.from_grid_now_w_total > 0 ? "Importing" : "Exporting"}
               </p>
             </CardContent>
           </Card>
@@ -454,50 +422,50 @@ export default function AdminLive() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {liveData.homes.map((home) => (
-                <Card key={home.id} className="relative overflow-hidden">
+              {homes.map((home) => (
+                <Card key={home.home_id} className="relative overflow-hidden">
                   <CardContent className="p-3">
-                    <div className="font-mono font-bold text-sm mb-2">{home.id}</div>
+                    <div className="font-mono font-bold text-sm mb-2">{home.home_id}</div>
                     
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">PV:</span>
-                        <span className="font-mono font-semibold text-yellow-600">{home.pv} kW</span>
+                        <span className="font-mono font-semibold text-yellow-600">{(home.pv_w / 1000).toFixed(1)} kW</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Load:</span>
-                        <span className="font-mono">{home.load} kW</span>
+                        <span className="font-mono">{(home.load_w / 1000).toFixed(1)} kW</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">SOC:</span>
-                        <span className="font-mono">{home.soc}%</span>
+                        <span className="font-mono">{home.soc_pct}%</span>
                       </div>
                       
-                      {home.share > 0 && (
+                      {home.sharing_w > 0 && (
                         <div className="flex justify-between text-green-600">
                           <span>Share:</span>
-                          <span className="font-mono">{home.share.toFixed(2)}</span>
+                          <span className="font-mono">{(home.sharing_w / 1000).toFixed(2)}</span>
                         </div>
                       )}
                       
-                      {home.recv > 0 && (
+                      {home.receiving_w > 0 && (
                         <div className="flex justify-between text-blue-600">
                           <span>Recv:</span>
-                          <span className="font-mono">{home.recv.toFixed(2)}</span>
+                          <span className="font-mono">{(home.receiving_w / 1000).toFixed(2)}</span>
                         </div>
                       )}
                       
-                      {home.exp > 0 && (
+                      {home.grid_export_w > 0 && (
                         <div className="flex justify-between text-purple-600">
                           <span>Export:</span>
-                          <span className="font-mono">{home.exp.toFixed(1)}</span>
+                          <span className="font-mono">{(home.grid_export_w / 1000).toFixed(1)}</span>
                         </div>
                       )}
                       
-                      {home.imp > 0 && (
+                      {home.grid_import_w > 0 && (
                         <div className="flex justify-between text-red-600">
                           <span>Import:</span>
-                          <span className="font-mono">{home.imp.toFixed(2)}</span>
+                          <span className="font-mono">{(home.grid_import_w / 1000).toFixed(2)}</span>
                         </div>
                       )}
                     </div>
@@ -506,10 +474,10 @@ export default function AdminLive() {
                     <div className="mt-2 w-full h-1 bg-muted rounded">
                       <div
                         className={`h-full rounded transition-all ${
-                          home.soc > 60 ? "bg-green-500" :
-                          home.soc > 30 ? "bg-yellow-500" : "bg-red-500"
+                          home.soc_pct > 60 ? "bg-green-500" :
+                          home.soc_pct > 30 ? "bg-yellow-500" : "bg-red-500"
                         }`}
-                        style={{ width: `${home.soc}%` }}
+                        style={{ width: `${home.soc_pct}%` }}
                       />
                     </div>
                   </CardContent>
@@ -520,11 +488,11 @@ export default function AdminLive() {
         </Card>
 
         {/* Unserved Load Warning */}
-        {liveData.community.unserved > 0 && (
+        {communityToday.unserved_wh > 0 && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Grid Outage Active:</strong> {liveData.community.unserved.toFixed(2)} kW of load is unserved
+              <strong>Grid Outage Active:</strong> {(communityToday.unserved_wh / 1000).toFixed(2)} kW of load is unserved
             </AlertDescription>
           </Alert>
         )}

@@ -3,235 +3,169 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff, Zap } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { Eye, EyeOff, Users, ArrowLeft, Activity, Wind, Power } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginAdmin() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@demo.com');
+  const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [setupLoading, setSetupLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/admin`
-          }
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: 'Account created',
-          description: 'You can now sign in immediately.',
-        });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        // Set admin role in AuthContext after successful Supabase login
-        login('admin');
-        navigate('/admin');
-      }
-    } catch (error: any) {
-      toast({
-        title: isSignUp ? 'Sign-up failed' : 'Sign-in failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setupDemoUsers = async () => {
-    setSetupLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('setup-demo-users');
-      
-      if (error) throw error;
-      
-      toast({
-        title: 'Demo users created!',
-        description: 'You can now sign in with admin@demo.com or user@demo.com (password: demo123)',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Setup failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setSetupLoading(false);
-    }
+    
+    // Simple demo login - no real authentication needed
+    setTimeout(() => {
+      login('admin', 'admin');
+      navigate('/admin');
+    }, 500);
   };
 
   const isDisabled = !email || !password || loading;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="w-full max-w-[520px]">
-        <div 
-          className="p-10 rounded-2xl"
-          style={{ 
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--border)',
-            boxShadow: 'var(--shadow-card)',
-            borderRadius: 'var(--radius-xl)'
-          }}
-        >
-          {/* Brand lockup */}
-          <div className="flex items-start gap-3 mb-5">
-            <div 
-              className="flex h-6 w-6 items-center justify-center rounded"
-              style={{ backgroundColor: 'var(--surface-2)' }}
-            >
-              <Zap className="h-4 w-4" style={{ color: 'var(--acc-green)' }} />
-            </div>
-            <div className="flex-1">
-              <div className="font-semibold mb-1" style={{ color: 'var(--text)' }}>
-                NeighborGrid
-              </div>
-              <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
-                {isSignUp ? 'Admin Console Sign up' : 'Admin Console Sign in'}
-              </h1>
-              <div className="flex items-center gap-2">
-                <p className="text-sm" style={{ color: 'var(--text-dim)' }}>For microgrid operators</p>
-                <Badge 
-                  variant="secondary" 
-                  className="text-xs"
-                  style={{ 
-                    backgroundColor: 'var(--surface-2)', 
-                    color: 'var(--muted)',
-                    border: '1px solid var(--border)'
-                  }}
-                >
-                  Operator Access
-                </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle Green Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-green-200/20 rounded-full animate-pulse"></div>
+        <div className="absolute top-32 right-20 w-24 h-24 bg-emerald-200/20 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-32 w-16 h-16 bg-teal-200/20 rounded-full animate-pulse delay-2000"></div>
+        <div className="absolute bottom-32 right-10 w-28 h-28 bg-green-200/15 rounded-full animate-pulse delay-500"></div>
+        <div className="absolute top-1/2 left-1/4 w-12 h-12 bg-emerald-200/25 rounded-full animate-pulse delay-1500"></div>
+        <div className="absolute top-1/3 right-1/3 w-20 h-20 bg-teal-200/20 rounded-full animate-pulse delay-3000"></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 text-sm text-cyan-300 hover:text-cyan-100 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to WattShare
+          </Link>
+        </div>
+
+        {/* Login Card */}
+        <Card className="shadow-xl border border-green-200 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="text-center pb-6">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 bg-green-100 rounded-2xl">
+                <Users className="h-10 w-10 text-green-600" />
               </div>
             </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <Label htmlFor="email" className="text-sm" style={{ color: 'var(--text-dim)' }}>Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
-                required
-                className="mt-1 h-12"
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text)',
-                  borderRadius: 'var(--radius-xl)'
-                }}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password" className="text-sm" style={{ color: 'var(--text-dim)' }}>Password</Label>
-              <div className="relative mt-1">
+            <CardTitle className="text-3xl font-bold text-gray-800">
+              Control Center
+            </CardTitle>
+            <CardDescription className="text-gray-600">
+              Manage the smart energy grid
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  Email Address
+                </Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-green-500 focus:ring-green-500"
                   required
-                  className="h-12 pr-10"
-                  style={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text)',
-                    borderRadius: 'var(--radius-xl)'
-                  }}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
-                  style={{ color: 'var(--muted)' }}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
-            </div>
 
-            <div className="pt-1">
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Login Button */}
               <Button
                 type="submit"
                 disabled={isDisabled}
-                className="w-full h-12 font-medium transition-all active:translate-y-px"
-                variant="default"
+                className="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-medium py-3"
               >
-                {loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create account' : 'Sign in')}
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Signing In...
+                  </div>
+                ) : (
+                  'Access Control Center'
+                )}
               </Button>
-            </div>
+            </form>
 
-            <div className="flex justify-between items-center text-sm pt-1">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
-                style={{ color: 'var(--acc-cyan)' }}
-              >
-                {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
-              </button>
-              <Link
-                to="/login/user"
-                className="hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 rounded px-1"
-                style={{ color: 'var(--acc-cyan)' }}
-              >
-                Sign in as User
-              </Link>
-            </div>
-
-            {/* Demo Setup Button - Prominent */}
-            <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-              <p className="text-xs text-center mb-2" style={{ color: 'var(--text-dim)' }}>
-                First time here? Create demo accounts to get started
-              </p>
-              <Button
-                type="button"
-                onClick={setupDemoUsers}
-                disabled={setupLoading}
-                className="w-full h-12 font-semibold"
-                style={{
-                  backgroundColor: 'var(--acc-green)',
-                  color: 'white'
-                }}
-              >
-                {setupLoading ? 'Setting up demo users...' : '⚡ Setup Demo Users'}
-              </Button>
-              <p className="text-xs text-center mt-2" style={{ color: 'var(--muted)' }}>
-                Creates: admin@demo.com & user@demo.com (password: demo123)
+            {/* Demo Info */}
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="text-sm font-medium text-gray-800 mb-2">
+                Demo Credentials
+              </h4>
+              <p className="text-xs text-gray-600">
+                Email: admin@demo.com<br />
+                Password: admin123
               </p>
             </div>
-          </form>
-        </div>
+
+            {/* Grid Management Features */}
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-gray-800 mb-3">
+                Grid Management
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Users className="h-3 w-3 text-green-500" />
+                  <span>20 connected homes</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Activity className="h-3 w-3 text-emerald-500" />
+                  <span>Live grid monitoring</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Wind className="h-3 w-3 text-teal-500" />
+                  <span>Load balancing controls</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Power className="h-3 w-3 text-yellow-500" />
+                  <span>Grid optimization</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

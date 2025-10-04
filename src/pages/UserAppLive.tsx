@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Activity, Home, Sun, Battery, Zap, TrendingUp, TrendingDown, ArrowUpCircle, ArrowDownCircle, Users } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useUserData } from "@/hooks/useUserData";
 
 interface SSEHome {
   id: string;
@@ -35,69 +36,42 @@ interface ChartPoint {
 
 export default function UserAppLive() {
   const { homeId: authHomeId } = useAuth();
-  const homeId = authHomeId || "H001"; // Default to H001 if not set
-  const [connected, setConnected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [liveHome, setLiveHome] = useState<SSEHome | null>(null);
+  const homeId = authHomeId || "H1"; // Default to H1 if not set (matches database)
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
-  const maxDataPoints = 60; // 30 seconds of history
+  const maxDataPoints = 30; // 30 minutes of history
+  
+  // Use Supabase data instead of SSE
+  const { homeLatest, todayData, dailyStats, loading, error } = useUserData("00000000-0000-0000-0000-000000000001", homeId);
 
+  // Process database data for chart
   useEffect(() => {
-    const es = new EventSource("http://localhost:3001/stream");
-
-    es.onopen = () => {
-      setConnected(true);
-      setError(null);
-    };
-
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        // Find this user's home
-        const myHome = data.homes.find((h: SSEHome) => h.id === homeId);
-        
-        if (myHome) {
-          setLiveHome(myHome);
-          
-          // Add to chart
-          const time = new Date(data.ts);
-          const newPoint: ChartPoint = {
-            time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            solar: myHome.pv,
-            consumption: myHome.load,
-            battery: myHome.soc,
-            sharing: myHome.share,
-            receiving: myHome.recv,
-            gridImport: myHome.imp,
-            gridExport: myHome.exp,
-          };
-          
-          setChartData(prev => {
-            const updated = [...prev, newPoint];
-            return updated.slice(-maxDataPoints);
-          });
-        }
-      } catch (err) {
-        console.error("Failed to parse SSE data:", err);
-      }
-    };
-
-    es.onerror = () => {
-      setConnected(false);
-      setError("Connection lost. Make sure simulator is running.");
-    };
-
-    return () => es.close();
-  }, [homeId]);
+    if (homeLatest) {
+      const time = new Date();
+      const newPoint: ChartPoint = {
+        time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        solar: homeLatest.pv_w / 1000, // Convert W to kW
+        consumption: homeLatest.load_w / 1000,
+        battery: homeLatest.soc_pct,
+        sharing: homeLatest.sharing_w / 1000,
+        receiving: homeLatest.receiving_w / 1000,
+        gridImport: homeLatest.grid_import_w / 1000,
+        gridExport: homeLatest.grid_export_w / 1000,
+      };
+      
+      setChartData(prev => {
+        const updated = [...prev, newPoint];
+        return updated.slice(-maxDataPoints);
+      });
+    }
+  }, [homeLatest]);
 
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <UserHeader homeId={homeId || "H001"} />
+        <UserHeader homeId={homeId || "H1"} />
         <div className="max-w-6xl mx-auto p-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Connection Error</h1>
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Database Error</h1>
             <p className="text-muted-foreground">{error}</p>
           </div>
         </div>
@@ -105,15 +79,15 @@ export default function UserAppLive() {
     );
   }
 
-  if (!liveHome) {
+  if (loading || !homeLatest) {
     return (
       <div className="min-h-screen bg-background">
-        <UserHeader homeId={homeId || "H001"} />
+        <UserHeader homeId={homeId || "H1"} />
         <div className="max-w-6xl mx-auto p-6">
           <div className="text-center">
             <Activity className="h-12 w-12 animate-pulse mx-auto text-primary mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Connecting to Home {homeId}...</h1>
-            <p className="text-muted-foreground">Loading live energy data</p>
+            <h1 className="text-2xl font-bold mb-2">Loading Home {homeId}...</h1>
+            <p className="text-muted-foreground">Loading live energy data from database</p>
           </div>
         </div>
       </div>
@@ -122,7 +96,7 @@ export default function UserAppLive() {
 
   return (
     <div className="min-h-screen bg-background">
-      <UserHeader homeId={homeId || "H001"} />
+      <UserHeader homeId={homeId || "H1"} />
 
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* Header */}
@@ -133,11 +107,11 @@ export default function UserAppLive() {
               Home {homeId}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Live energy monitoring • Updated every 0.5s
+              Live energy monitoring • Updated every minute
             </p>
           </div>
-          <Badge variant={connected ? "default" : "secondary"} className="text-sm">
-            {connected ? "🟢 LIVE" : "⚫ Offline"}
+          <Badge variant="default" className="text-sm">
+            🟢 LIVE
           </Badge>
         </div>
 
@@ -152,7 +126,7 @@ export default function UserAppLive() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-yellow-600">{liveHome.pv} kW</div>
+              <div className="text-3xl font-bold text-yellow-600">{(homeLatest.pv_w / 1000).toFixed(1)} kW</div>
               <p className="text-xs text-muted-foreground mt-1">
                 Current generation
               </p>
@@ -168,7 +142,7 @@ export default function UserAppLive() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-600">{liveHome.load} kW</div>
+              <div className="text-3xl font-bold text-orange-600">{(homeLatest.load_w / 1000).toFixed(1)} kW</div>
               <p className="text-xs text-muted-foreground mt-1">
                 Current usage
               </p>
@@ -184,7 +158,7 @@ export default function UserAppLive() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">{liveHome.soc}%</div>
+              <div className="text-3xl font-bold text-purple-600">{homeLatest.soc_pct}%</div>
               <p className="text-xs text-muted-foreground mt-1">
                 State of charge
               </p>
@@ -204,7 +178,7 @@ export default function UserAppLive() {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-green-600">
-                {liveHome.share.toFixed(2)} kW
+                {(homeLatest.sharing_w / 1000).toFixed(2)} kW
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Helping neighbors
@@ -222,7 +196,7 @@ export default function UserAppLive() {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold text-blue-600">
-                {liveHome.recv.toFixed(2)} kW
+                {(homeLatest.receiving_w / 1000).toFixed(2)} kW
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Getting help from neighbors
@@ -243,14 +217,14 @@ export default function UserAppLive() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
                 <div className="text-2xl font-bold text-orange-600">
-                  {liveHome.imp.toFixed(1)} kW
+                  {(homeLatest.grid_import_w / 1000).toFixed(1)} kW
                 </div>
                 <div className="text-sm text-muted-foreground">Grid Import</div>
               </div>
               
               <div className="text-center p-4 bg-cyan-50 dark:bg-cyan-950 rounded-lg">
                 <div className="text-2xl font-bold text-cyan-600">
-                  {liveHome.exp.toFixed(1)} kW
+                  {(homeLatest.grid_export_w / 1000).toFixed(1)} kW
                 </div>
                 <div className="text-sm text-muted-foreground">Grid Export</div>
               </div>
@@ -263,7 +237,7 @@ export default function UserAppLive() {
           <CardHeader>
             <CardTitle>Complete Energy Flow Timeline</CardTitle>
             <CardDescription>
-              Last {maxDataPoints} updates • All energy flows in one view
+              Last {maxDataPoints} minutes • All energy flows in one view
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -406,56 +380,56 @@ export default function UserAppLive() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t">
                 <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {liveHome.pv.toFixed(1)}
+                    {(homeLatest.pv_w / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Solar (kW)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-red-50 dark:bg-red-950 rounded-lg">
                   <div className="text-2xl font-bold text-red-600">
-                    {liveHome.load.toFixed(1)}
+                    {(homeLatest.load_w / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Load (kW)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-green-50 dark:bg-green-950 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">
-                    {liveHome.share.toFixed(1)}
+                    {(homeLatest.sharing_w / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Sharing (kW)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">
-                    {liveHome.recv.toFixed(1)}
+                    {(homeLatest.receiving_w / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Receiving (kW)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">
-                    {liveHome.soc}%
+                    {homeLatest.soc_pct}%
                   </div>
                   <div className="text-xs text-muted-foreground">Battery SOC</div>
                 </div>
                 
                 <div className="text-center p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
                   <div className="text-2xl font-bold text-orange-600">
-                    {liveHome.imp.toFixed(1)}
+                    {(homeLatest.grid_import_w / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Grid Import (kW)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-cyan-50 dark:bg-cyan-950 rounded-lg">
                   <div className="text-2xl font-bold text-cyan-600">
-                    {liveHome.exp.toFixed(1)}
+                    {(homeLatest.grid_export_w / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Grid Export (kW)</div>
                 </div>
                 
                 <div className="text-center p-3 bg-gray-50 dark:bg-gray-950 rounded-lg">
                   <div className="text-2xl font-bold text-gray-600">
-                    {((liveHome.pv - liveHome.load) + liveHome.recv - liveHome.share).toFixed(1)}
+                    {(((homeLatest.pv_w - homeLatest.load_w) + homeLatest.receiving_w - homeLatest.sharing_w) / 1000).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Net Flow (kW)</div>
                 </div>
@@ -471,7 +445,7 @@ export default function UserAppLive() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Your personal energy dashboard is successfully receiving live data from the simulator backend.
+              Your personal energy dashboard is successfully receiving live data from the Supabase database.
               All energy flows are updating in real-time with the complete chart visualization!
             </p>
           </CardContent>
