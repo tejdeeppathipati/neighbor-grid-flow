@@ -18,6 +18,7 @@ export default function Admin() {
             </p>
           </div>
 
+          {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>

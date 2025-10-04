@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import InteractiveMap from "@/components/admin/InteractiveMap";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,41 @@ export default function AdminLive() {
   const [error, setError] = useState<string | null>(null);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const maxDataPoints = 120; // Keep last 120 points (1 minute in accelerated mode)
+  const maxDataPoints = 96; // Keep last 96 points (24 hours = 96 * 15min intervals)
+
+  // Mapping from simulation IDs to family names
+  const simIdToFamily: { [key: string]: string } = {
+    'H001': 'Johnson',
+    'H002': 'Smith', 
+    'H003': 'Williams',
+    'H004': 'Brown',
+    'H005': 'Davis',
+    'H006': 'Miller',
+    'H007': 'Wilson',
+    'H008': 'Moore',
+    'H009': 'Taylor',
+    'H010': 'Anderson',
+    'H011': 'Garcia',
+    'H012': 'Martinez',
+    'H013': 'Rodriguez',
+    'H014': 'Lopez',
+    'H015': 'Gonzalez',
+    'H016': 'Flores',
+    'H017': 'Rivera',
+    'H018': 'Cooper',
+    'H019': 'Reed',
+    'H020': 'Cook',
+    'H021': 'Bailey',
+    'H022': 'Murphy',
+    'H023': 'Kelly',
+    'H024': 'Howard',
+    'H025': 'Ward'
+  };
+
+  // Get family name from simulation ID
+  const getFamilyName = (simId: string) => {
+    return simIdToFamily[simId] || simId;
+  };
 
   // Connect to SSE stream
   useEffect(() => {
@@ -175,7 +210,7 @@ export default function AdminLive() {
               Live Simulator
             </h1>
             <p className="text-muted-foreground mt-1">
-              Real-time energy flow • Updated every 0.5s • 20 homes active
+               Real-time energy flow • Updated every 1s (15min intervals) • 20 homes active
             </p>
           </div>
           <Badge variant={connected ? "default" : "secondary"} className="text-sm">
@@ -189,7 +224,7 @@ export default function AdminLive() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Simulation Time</CardTitle>
-                <CardDescription>Virtual clock in accelerated mode (1 min = 0.5s)</CardDescription>
+                 <CardDescription>Virtual clock in accelerated mode (15 min = 1s)</CardDescription>
               </div>
               <div className="text-right">
                 <div className="text-3xl font-mono font-bold">
@@ -235,6 +270,9 @@ export default function AdminLive() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Interactive Map */}
+        <InteractiveMap homes={liveData.homes} />
 
         {/* Live KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -316,9 +354,9 @@ export default function AdminLive() {
         <Card>
           <CardHeader>
             <CardTitle>Energy Flow Timeline</CardTitle>
-            <CardDescription>
-              Live tracking of production, consumption, and shared energy (last {maxDataPoints} updates)
-            </CardDescription>
+              <CardDescription>
+                Live tracking of production, consumption, and shared energy (last {maxDataPoints} updates • 15-min intervals)
+              </CardDescription>
           </CardHeader>
           <CardContent>
             {chartData.length > 0 ? (
@@ -370,15 +408,15 @@ export default function AdminLive() {
                     dot={false}
                     activeDot={{ r: 6 }}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="shared"
-                    name="Microgrid Shared"
-                    stroke="hsl(158 74% 40%)"
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 6 }}
-                  />
+                    <Line
+                      type="monotone"
+                      dataKey="shared"
+                      name="🔄 Microgrid Shared"
+                      stroke="hsl(158 74% 40%)"
+                      strokeWidth={4}
+                      dot={{ r: 4, fill: "hsl(158 74% 40%)" }}
+                      activeDot={{ r: 8, stroke: "hsl(158 74% 40%)", strokeWidth: 3 }}
+                    />
                   <Line
                     type="monotone"
                     dataKey="gridImport"
@@ -410,36 +448,41 @@ export default function AdminLive() {
 
             {/* Summary Stats */}
             {chartData.length > 0 && (
-              <div className="grid grid-cols-5 gap-4 mt-6 pt-4 border-t">
-                <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "hsl(45 93% 58%)" }}>
-                    {chartData[chartData.length - 1].production}
+              <div className="mt-6 pt-4 border-t">
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Energy Status</h4>
+                  <div className="grid grid-cols-5 gap-4">
+                    <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {chartData[chartData.length - 1].production}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Production (kW)</div>
+                    </div>
+                    <div className="text-center p-3 bg-red-50 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">
+                        {chartData[chartData.length - 1].consumption}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Consumption (kW)</div>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                      <div className="text-2xl font-bold text-green-600">
+                        {chartData[chartData.length - 1].shared}
+                      </div>
+                      <div className="text-xs text-muted-foreground font-semibold">🔄 Microgrid Shared (kW)</div>
+                    </div>
+                    <div className="text-center p-3 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {chartData[chartData.length - 1].gridImport}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Import (kW)</div>
+                    </div>
+                    <div className="text-center p-3 bg-cyan-50 rounded-lg">
+                      <div className="text-2xl font-bold text-cyan-600">
+                        {chartData[chartData.length - 1].gridExport}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Export (kW)</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Production (kW)</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "hsl(0 66% 54%)" }}>
-                    {chartData[chartData.length - 1].consumption}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Consumption (kW)</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "hsl(158 74% 40%)" }}>
-                    {chartData[chartData.length - 1].shared}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Shared (kW)</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "hsl(218 100% 62%)" }}>
-                    {chartData[chartData.length - 1].gridImport}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Import (kW)</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: "hsl(187 100% 39%)" }}>
-                    {chartData[chartData.length - 1].gridExport}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Export (kW)</div>
                 </div>
               </div>
             )}
@@ -449,72 +492,111 @@ export default function AdminLive() {
         {/* Live Homes Grid */}
         <Card>
           <CardHeader>
-            <CardTitle>Live Home Status</CardTitle>
-            <CardDescription>Real-time power flows and battery state for all 20 homes</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-500" />
+              Live Home Status
+            </CardTitle>
+            <CardDescription>Real-time power flows and battery state for 15 key homes</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {liveData.homes.map((home) => (
-                <Card key={home.id} className="relative overflow-hidden">
-                  <CardContent className="p-3">
-                    <div className="font-mono font-bold text-sm mb-2">{home.id}</div>
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {liveData.homes.slice(0, 15).map((home) => {
+                const familyName = getFamilyName(home.id);
+                const isMicrogrid = ['H001', 'H002', 'H003', 'H004', 'H005', 'H006', 'H007', 'H008', 'H009', 'H010', 'H016', 'H017', 'H018', 'H019', 'H020'].includes(home.id);
+                
+                return (
+                  <Card key={home.id} className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${isMicrogrid ? 'border-blue-200 bg-blue-50/30' : 'border-gray-200'}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="font-semibold text-sm text-gray-900">{familyName} Family</div>
+                        {isMicrogrid && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        )}
+                      </div>
                     
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">PV:</span>
-                        <span className="font-mono font-semibold text-yellow-600">{home.pv} kW</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Load:</span>
-                        <span className="font-mono">{home.load} kW</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">SOC:</span>
-                        <span className="font-mono">{home.soc}%</span>
-                      </div>
-                      
-                      {home.share > 0 && (
-                        <div className="flex justify-between text-green-600">
-                          <span>Share:</span>
-                          <span className="font-mono">{home.share.toFixed(2)}</span>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600 flex items-center gap-1">
+                            <Zap className="h-3 w-3 text-yellow-500" />
+                            PV:
+                          </span>
+                          <span className="font-mono font-medium text-yellow-600">{home.pv} kW</span>
                         </div>
-                      )}
-                      
-                      {home.recv > 0 && (
-                        <div className="flex justify-between text-blue-600">
-                          <span>Recv:</span>
-                          <span className="font-mono">{home.recv.toFixed(2)}</span>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600 flex items-center gap-1">
+                            <TrendingDown className="h-3 w-3 text-red-500" />
+                            Load:
+                          </span>
+                          <span className="font-mono font-medium text-red-600">{home.load} kW</span>
                         </div>
-                      )}
-                      
-                      {home.exp > 0 && (
-                        <div className="flex justify-between text-purple-600">
-                          <span>Export:</span>
-                          <span className="font-mono">{home.exp.toFixed(1)}</span>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600 flex items-center gap-1">
+                            <Battery className="h-3 w-3 text-blue-500" />
+                            SOC:
+                          </span>
+                          <span className="font-mono font-medium text-blue-600">{home.soc}%</span>
                         </div>
-                      )}
                       
-                      {home.imp > 0 && (
-                        <div className="flex justify-between text-red-600">
-                          <span>Import:</span>
-                          <span className="font-mono">{home.imp.toFixed(2)}</span>
-                        </div>
-                      )}
+                        {home.share > 0 && (
+                          <div className="flex justify-between items-center text-green-600">
+                            <span className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              Share:
+                            </span>
+                            <span className="font-mono font-medium">{home.share.toFixed(2)} kW</span>
+                          </div>
+                        )}
+                        
+                        {home.recv > 0 && (
+                          <div className="flex justify-between items-center text-cyan-600">
+                            <span className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+                              Recv:
+                            </span>
+                            <span className="font-mono font-medium">{home.recv.toFixed(2)} kW</span>
+                          </div>
+                        )}
+                        
+                        {home.exp > 0 && (
+                          <div className="flex justify-between items-center text-purple-600">
+                            <span className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                              Export:
+                            </span>
+                            <span className="font-mono font-medium">{home.exp.toFixed(1)} kW</span>
+                          </div>
+                        )}
+                        
+                        {home.imp > 0 && (
+                          <div className="flex justify-between items-center text-red-600">
+                            <span className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                              Import:
+                            </span>
+                            <span className="font-mono font-medium">{home.imp.toFixed(2)} kW</span>
+                          </div>
+                        )}
                     </div>
 
-                    {/* SOC indicator */}
-                    <div className="mt-2 w-full h-1 bg-muted rounded">
-                      <div
-                        className={`h-full rounded transition-all ${
-                          home.soc > 60 ? "bg-green-500" :
-                          home.soc > 30 ? "bg-yellow-500" : "bg-red-500"
-                        }`}
-                        style={{ width: `${home.soc}%` }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      
+                      {/* Fixed SOC Status Block */}
+                      <div className="mt-3 p-2 bg-gray-100 rounded-md">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-600">Battery Status:</span>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            home.soc > 60 ? 'bg-green-100 text-green-700' : 
+                            home.soc > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            {home.soc > 60 ? 'High' : home.soc > 30 ? 'Medium' : 'Low'}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
