@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Sun, Zap, Download, Upload } from 'lucide-react';
 import type { AdminOverview } from '@/data/MockDataProvider';
+import { formatKwh } from '@/lib/formatters';
 
 interface CommunityTotalsProps {
   overview: AdminOverview;
@@ -51,8 +52,8 @@ export function CommunityTotals({ overview }: CommunityTotalsProps) {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className={`text-2xl font-bold ${stat.color}`}>
-                {stat.value.toFixed(1)}
+              <p className={`text-2xl font-bold ${stat.color} tabular-nums`}>
+                {formatKwh(stat.value)}
                 <span className="text-sm ml-1">kWh</span>
               </p>
             </div>

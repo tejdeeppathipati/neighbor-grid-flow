@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Upload, Download, AlertCircle, Shield } from 'lucide-react';
+import { formatKw, formatKwh } from '@/lib/formatters';
 
 interface GridDrawer {
   id: string;
@@ -47,7 +48,7 @@ export function GridExchangeCard({
             <div>
               <p className="text-sm text-muted-foreground mb-1">Now</p>
               <p className="text-4xl font-semibold text-grid-export tabular-nums">
-                {toGridNowKwTotal.toFixed(2)}
+                {formatKw(toGridNowKwTotal)}
                 <span className="text-lg ml-2">kW</span>
               </p>
             </div>
@@ -55,7 +56,7 @@ export function GridExchangeCard({
             <div>
               <p className="text-sm text-muted-foreground mb-1">Today</p>
               <p className="text-xl font-semibold text-grid-export/80 tabular-nums">
-                {toGridTodayKwhTotal.toFixed(1)}
+                {formatKwh(toGridTodayKwhTotal)}
                 <span className="text-sm ml-1">kWh</span>
               </p>
             </div>
@@ -71,7 +72,7 @@ export function GridExchangeCard({
                       variant="outline"
                       className="border-grid-export/40 text-grid-export bg-grid-export/10 tabular-nums"
                     >
-                      {exporter.id} {exporter.kw.toFixed(2)} kW
+                      {exporter.id} {formatKw(exporter.kw)} kW
                     </Badge>
                   ))}
                 </div>
@@ -91,7 +92,7 @@ export function GridExchangeCard({
             <div>
               <p className="text-sm text-muted-foreground mb-1">Now (Total)</p>
               <p className="text-4xl font-semibold text-grid-import tabular-nums">
-                {fromGridNowKwTotal.toFixed(2)}
+                {formatKw(fromGridNowKwTotal)}
                 <span className="text-lg ml-2">kW</span>
               </p>
             </div>
@@ -108,7 +109,7 @@ export function GridExchangeCard({
                     >
                       <span className="font-medium text-foreground">{drawer.id}</span>
                       <span className="text-sm font-semibold text-grid-import tabular-nums">
-                        {drawer.kw.toFixed(2)} kW
+                        {formatKw(drawer.kw)} kW
                       </span>
                     </div>
                   ))}
@@ -128,7 +129,7 @@ export function GridExchangeCard({
         {unservedNeedKw > 0 && (
           <Badge variant="outline" className="border-grid-import text-grid-import bg-grid-import/10">
             <AlertCircle className="mr-1 h-3 w-3" />
-            Unserved: {unservedNeedKw.toFixed(2)} kW
+            Unserved: {formatKw(unservedNeedKw)} kW
           </Badge>
         )}
         {isIslanded && (

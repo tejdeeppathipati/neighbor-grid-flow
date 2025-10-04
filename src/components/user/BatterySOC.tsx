@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Battery, TrendingUp, TrendingDown } from 'lucide-react';
 import type { UserSummary } from '@/data/MockDataProvider';
+import { formatPercent, formatKwh } from '@/lib/formatters';
 
 interface BatterySOCProps {
   summary: UserSummary;
@@ -47,8 +48,8 @@ export function BatterySOC({ summary }: BatterySOCProps) {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <Battery className={`h-8 w-8 mb-1 ${batteryColor}`} />
-            <span className={`text-2xl font-bold ${batteryColor}`}>
-              {percentage}%
+            <span className={`text-2xl font-bold tabular-nums ${batteryColor}`}>
+              {formatPercent(percentage)}%
             </span>
           </div>
         </div>
@@ -59,8 +60,8 @@ export function BatterySOC({ summary }: BatterySOCProps) {
           <TrendingUp className="h-4 w-4 text-surplus mt-1" />
           <div>
             <p className="text-sm text-muted-foreground">Charged Today</p>
-            <p className="text-lg font-bold text-surplus">
-              {summary.battery_charge_today_kwh.toFixed(1)} kWh
+            <p className="text-lg font-bold text-surplus tabular-nums">
+              {formatKwh(summary.battery_charge_today_kwh)} kWh
             </p>
           </div>
         </div>
@@ -68,8 +69,8 @@ export function BatterySOC({ summary }: BatterySOCProps) {
           <TrendingDown className="h-4 w-4 text-consumption mt-1" />
           <div>
             <p className="text-sm text-muted-foreground">Discharged Today</p>
-            <p className="text-lg font-bold text-consumption">
-              {summary.battery_discharge_today_kwh.toFixed(1)} kWh
+            <p className="text-lg font-bold text-consumption tabular-nums">
+              {formatKwh(summary.battery_discharge_today_kwh)} kWh
             </p>
           </div>
         </div>

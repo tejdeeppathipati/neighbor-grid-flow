@@ -9,8 +9,9 @@ interface UsagePatternChartProps {
 export function UsagePatternChart({ patterns }: UsagePatternChartProps) {
   const data = patterns.times.map((time, idx) => ({
     time,
-    solar: patterns.solar_kwh[idx],
-    consumption: patterns.consumption_kwh[idx],
+    solar: Math.round(patterns.solar_kwh[idx]),
+    consumption: Math.round(patterns.consumption_kwh[idx]),
+    toGrid: Math.round((patterns as any).to_grid_kwh?.[idx] || 0),
   }));
 
   return (
@@ -26,6 +27,10 @@ export function UsagePatternChart({ patterns }: UsagePatternChartProps) {
             <linearGradient id="consumptionGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="hsl(var(--consumption))" stopOpacity={0.3}/>
               <stop offset="95%" stopColor="hsl(var(--consumption))" stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="toGridGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="hsl(var(--grid-export))" stopOpacity={0.35}/>
+              <stop offset="95%" stopColor="hsl(var(--grid-export))" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -62,6 +67,14 @@ export function UsagePatternChart({ patterns }: UsagePatternChartProps) {
             strokeWidth={2}
             fill="url(#consumptionGradient)"
             name="Consumption"
+          />
+          <Area 
+            type="monotone" 
+            dataKey="toGrid" 
+            stroke="hsl(var(--grid-export))" 
+            strokeWidth={2}
+            fill="url(#toGridGradient)"
+            name="Sent to Grid"
           />
         </AreaChart>
       </ResponsiveContainer>

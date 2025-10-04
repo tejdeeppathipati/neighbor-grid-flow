@@ -1,5 +1,6 @@
 import { RoleSwitcher } from '@/components/RoleSwitcher';
 import { TickControls } from '@/components/TickControls';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Home, Zap } from 'lucide-react';
 
 interface UserHeaderProps {
@@ -23,6 +24,7 @@ export function UserHeader({ homeId, lastUpdate, onTick }: UserHeaderProps) {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <TickControls onTick={onTick} lastUpdate={lastUpdate} />
             <RoleSwitcher />
           </div>

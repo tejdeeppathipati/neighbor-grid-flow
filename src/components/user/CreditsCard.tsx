@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Coins, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 import type { UserSummary } from '@/data/MockDataProvider';
+import { formatCredits, formatKwh } from '@/lib/formatters';
 
 interface CreditsCardProps {
   summary: UserSummary;
@@ -18,8 +19,8 @@ export function CreditsCard({ summary }: CreditsCardProps) {
         {/* Monthly Net */}
         <div className="text-center py-4 bg-gradient-hero rounded-lg">
           <p className="text-sm text-muted-foreground mb-1">Month-to-Date Net</p>
-          <p className={`text-4xl font-bold ${summary.credits_month_net_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
-            {summary.credits_month_net_kwh >= 0 ? '+' : ''}{summary.credits_month_net_kwh.toFixed(1)}
+          <p className={`text-4xl font-bold tabular-nums ${summary.credits_month_net_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
+            {formatCredits(summary.credits_month_net_kwh)}
             <span className="text-lg ml-1">kWh</span>
           </p>
         </div>
@@ -30,8 +31,8 @@ export function CreditsCard({ summary }: CreditsCardProps) {
             <TrendingUp className="h-4 w-4 text-surplus mt-1" />
             <div>
               <p className="text-sm text-muted-foreground">Earned Today</p>
-              <p className="text-lg font-bold text-surplus">
-                +{summary.credits_today_earned_kwh.toFixed(1)} kWh
+              <p className="text-lg font-bold text-surplus tabular-nums">
+                +{formatKwh(summary.credits_today_earned_kwh)} kWh
               </p>
             </div>
           </div>
@@ -39,8 +40,8 @@ export function CreditsCard({ summary }: CreditsCardProps) {
             <TrendingDown className="h-4 w-4 text-consumption mt-1" />
             <div>
               <p className="text-sm text-muted-foreground">Used Today</p>
-              <p className="text-lg font-bold text-consumption">
-                -{summary.credits_today_used_kwh.toFixed(1)} kWh
+              <p className="text-lg font-bold text-consumption tabular-nums">
+                {formatKwh(summary.credits_today_used_kwh)} kWh
               </p>
             </div>
           </div>
@@ -53,13 +54,13 @@ export function CreditsCard({ summary }: CreditsCardProps) {
             {summary.credits_today_earned_kwh > 0 && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Shared to microgrid</span>
-                <span className="text-surplus font-medium">+{summary.credits_today_earned_kwh.toFixed(1)} kWh</span>
+                <span className="text-surplus font-medium tabular-nums">+{formatKwh(summary.credits_today_earned_kwh)} kWh</span>
               </div>
             )}
             {summary.credits_today_used_kwh > 0 && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Received from microgrid</span>
-                <span className="text-consumption font-medium">-{summary.credits_today_used_kwh.toFixed(1)} kWh</span>
+                <span className="text-consumption font-medium tabular-nums">{formatKwh(summary.credits_today_used_kwh)} kWh</span>
               </div>
             )}
             {summary.credits_today_earned_kwh === 0 && summary.credits_today_used_kwh === 0 && (

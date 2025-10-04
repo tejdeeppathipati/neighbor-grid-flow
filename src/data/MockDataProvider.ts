@@ -70,6 +70,7 @@ type UserPatterns = {
   times: string[];
   solar_kwh: number[];
   consumption_kwh: number[];
+  to_grid_kwh?: number[];
 };
 
 type UserSharing = {

@@ -26,13 +26,7 @@ export default function Admin() {
       />
 
       <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Houses Grid */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Solar Homes Overview</h2>
-          <HousesGrid houses={adminHouses} />
-        </section>
-
-        {/* Grid Exchange and Community */}
+        {/* Grid Exchange (Top) */}
         <GridExchangeCard
           toGridNowKwTotal={adminGridExchange.to_grid_now_kw_total}
           toGridTodayKwhTotal={adminGridExchange.to_grid_today_kwh_total}
@@ -43,14 +37,21 @@ export default function Admin() {
           isIslanded={adminGridExchange.is_islanded}
         />
 
-        {/* Community Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <CommunityTotals overview={adminOverview} />
-          <FairRateCard overview={adminOverview} />
-        </div>
+        {/* Community Overview (Middle) */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Community Overview (Today)</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <CommunityTotals overview={adminOverview} />
+            <FairRateCard overview={adminOverview} />
+          </div>
+          <PmgGridTrend trends={adminTrends} />
+        </section>
 
-        {/* Trend Chart */}
-        <PmgGridTrend trends={adminTrends} />
+        {/* Houses Grid (Bottom) */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Solar Homes Overview</h2>
+          <HousesGrid houses={adminHouses} />
+        </section>
       </main>
     </div>
   );

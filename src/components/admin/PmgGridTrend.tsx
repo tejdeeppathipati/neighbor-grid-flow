@@ -9,9 +9,9 @@ interface PmgGridTrendProps {
 export function PmgGridTrend({ trends }: PmgGridTrendProps) {
   const data = trends.times.map((time, idx) => ({
     time,
-    production: trends.production_kwh[idx],
-    microgrid: trends.microgrid_used_kwh[idx],
-    grid: trends.grid_kwh[idx],
+    production: Math.round(trends.production_kwh[idx]),
+    microgrid: Math.round(trends.microgrid_used_kwh[idx]),
+    grid: Math.round(trends.grid_kwh[idx]),
   }));
 
   return (

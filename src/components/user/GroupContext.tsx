@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown, Users, Zap } from 'lucide-react';
 import type { UserSharing } from '@/data/MockDataProvider';
+import { formatKw } from '@/lib/formatters';
 
 interface GroupContextProps {
   sharing: UserSharing;
@@ -23,8 +24,8 @@ export function GroupContext({ sharing }: GroupContextProps) {
               <ArrowUp className="h-4 w-4 text-surplus" />
               <span className="text-sm text-muted-foreground">Sharing Now</span>
             </div>
-            <p className="text-2xl font-bold text-surplus">
-              {sharing.to_microgrid_now_kw.toFixed(2)} kW
+            <p className="text-2xl font-bold text-surplus tabular-nums">
+              {formatKw(sharing.to_microgrid_now_kw)} kW
             </p>
           </div>
           <div>
@@ -32,8 +33,8 @@ export function GroupContext({ sharing }: GroupContextProps) {
               <ArrowDown className="h-4 w-4 text-consumption" />
               <span className="text-sm text-muted-foreground">Receiving Now</span>
             </div>
-            <p className="text-2xl font-bold text-consumption">
-              {sharing.from_microgrid_now_kw.toFixed(2)} kW
+            <p className="text-2xl font-bold text-consumption tabular-nums">
+              {formatKw(sharing.from_microgrid_now_kw)} kW
             </p>
           </div>
         </div>
@@ -76,8 +77,8 @@ export function GroupContext({ sharing }: GroupContextProps) {
               <Zap className="h-4 w-4 text-grid-export" />
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">Unused surplus → grid</p>
-                <p className="text-lg font-bold text-grid-export">
-                  {sharing.unused_surplus_to_grid_now_kw.toFixed(2)} kW
+                <p className="text-lg font-bold text-grid-export tabular-nums">
+                  {formatKw(sharing.unused_surplus_to_grid_now_kw)} kW
                 </p>
               </div>
             </div>

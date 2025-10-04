@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Calendar, TrendingUp } from 'lucide-react';
 import type { UserForecast } from '@/data/MockDataProvider';
+import { formatCredits } from '@/lib/formatters';
 
 interface MonthlyForecastProps {
   forecast: UserForecast;
@@ -10,8 +11,8 @@ interface MonthlyForecastProps {
 export function MonthlyForecast({ forecast }: MonthlyForecastProps) {
   const data = forecast.days.map((day, idx) => ({
     day,
-    solar: forecast.solar_kwh[idx],
-    consumption: forecast.consumption_kwh[idx],
+    solar: Math.round(forecast.solar_kwh[idx]),
+    consumption: Math.round(forecast.consumption_kwh[idx]),
   }));
 
   return (
@@ -67,8 +68,8 @@ export function MonthlyForecast({ forecast }: MonthlyForecastProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Month-end projection</span>
           </div>
-          <span className={`text-xl font-bold ${forecast.credits_month_end_projection_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
-            {forecast.credits_month_end_projection_kwh >= 0 ? '+' : ''}{forecast.credits_month_end_projection_kwh.toFixed(1)} kWh
+          <span className={`text-xl font-bold tabular-nums ${forecast.credits_month_end_projection_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
+            {formatCredits(forecast.credits_month_end_projection_kwh)} kWh
           </span>
         </div>
       </div>

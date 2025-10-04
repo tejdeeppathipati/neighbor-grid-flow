@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Sun, Zap, TrendingUp, TrendingDown } from 'lucide-react';
 import type { UserSummary } from '@/data/MockDataProvider';
+import { formatKw, formatKwh } from '@/lib/formatters';
 
 interface HomeSummaryCardProps {
   summary: UserSummary;
@@ -38,12 +39,12 @@ export function HomeSummaryCard({ summary }: HomeSummaryCardProps) {
             </div>
             <div className="flex-1">
               <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-              <p className={`text-3xl font-bold ${stat.color}`}>
-                {stat.now.toFixed(2)}
+              <p className={`text-3xl font-bold ${stat.color} tabular-nums`}>
+                {formatKw(stat.now)}
                 <span className="text-lg ml-1">kW</span>
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {stat.today.toFixed(1)} kWh today
+              <p className="text-sm text-muted-foreground mt-1 tabular-nums">
+                {formatKwh(stat.today)} kWh today
               </p>
             </div>
           </div>
@@ -59,8 +60,8 @@ export function HomeSummaryCard({ summary }: HomeSummaryCardProps) {
             ) : (
               <TrendingDown className="h-4 w-4 text-consumption" />
             )}
-            <span className={`text-xl font-bold ${summary.surplus_today_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
-              {summary.surplus_today_kwh >= 0 ? '+' : ''}{summary.surplus_today_kwh.toFixed(1)} kWh
+            <span className={`text-xl font-bold tabular-nums ${summary.surplus_today_kwh >= 0 ? 'text-surplus' : 'text-consumption'}`}>
+              {summary.surplus_today_kwh >= 0 ? '+' : ''}{formatKwh(summary.surplus_today_kwh)} kWh
             </span>
           </div>
         </div>
