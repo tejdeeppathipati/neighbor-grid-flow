@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import InteractiveMap from "@/components/admin/InteractiveMap";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -279,6 +280,19 @@ export default function AdminLive() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Interactive Map */}
+        <InteractiveMap homes={homes.map(home => ({
+          id: home.home_id,
+          pv: home.pv_w / 1000,
+          load: home.load_w / 1000,
+          soc: home.soc_pct,
+          share: home.sharing_w / 1000,
+          recv: home.receiving_w / 1000,
+          imp: home.grid_import_w / 1000,
+          exp: home.grid_export_w / 1000,
+          creditsDelta: 0
+        }))} />
 
         {/* Real-Time Chart */}
         <Card>
